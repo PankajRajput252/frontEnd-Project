@@ -152,6 +152,29 @@ export interface WalletData {
   createdDatetime?: string;
   lastModifiedDateTime?: string;
 }
+<<<<<<< HEAD
+=======
+export interface DataApi{
+totalUser: number,
+totalActiveUser: number,
+totalInactiveUser: number,
+totalNormalUser: number,
+totalAdminUser: number,
+totalWallet: number,
+totalMineWallet: number,
+totalMineInvestment?: string | null,
+nodewallet: number,
+capitalWallet: number,
+totalROIIncome?: string | null,
+totalWithdrawal?: string | null,
+totalDirectIncome?: string | null,
+totalDeposit?: string | null,
+totalCredit: number,
+totalDebit: number,
+totalRevenue?: string | null,
+totalNetProfit?: string | null,
+}
+>>>>>>> 37c7179d20a27f98fe9eb9ee188a63a86806491e
 
 export interface AddWalletDataRequest {
   walletPkId: null;
@@ -518,6 +541,41 @@ export const miningPackageApi = {
   delete: (id: number): Promise<void> =>
     apiCall<void>(`/api/individual/deleteMiningPackage/${id}`, 'DELETE'),
 };
+<<<<<<< HEAD
+=======
+// export const adminDashboardCard ={
+//   getAll:(
+//     page: number = 0,
+//     size: number = 25,
+//     filterBy: string = 'ACTIVE',
+//     inputPkId: string | null,
+//     inputFkId: string | null
+//   ): Promise<{ content: MiningPackageItem[]; totalElements: number; count?: number }> =>
+//     apiCall<any>(
+//       `/api/admin/getAdminDashboardCount?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=${inputPkId}&inputFkId=${inputFkId}`
+//     ).then((response) => ({
+//       content: response.data || [],
+//       totalElements: response.count || 0,
+//       count: response.count,
+//     })),
+//     //api/admin/getAdminDashboardCount?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=null
+// }
+// I.E. Data API functions
+export const ieDataApi = {
+  // Get all I.E. data with pagination and filtering
+  getAll: (
+    page: number = 0,
+    size: number = 25,
+    filterBy: string = 'ACTIVE'
+  ): Promise<{ content: IeData[]; totalElements: number }> =>
+    apiCall<any>(
+      `/api/admin/getAdminDashboardCount?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=null`
+    ).then((response) => ({
+      content: response || [],
+      totalElements: response.count || 0,
+    })),
+};
+>>>>>>> 37c7179d20a27f98fe9eb9ee188a63a86806491e
 
 // Deposit Fund interfaces
 export interface DepositFundItem {
@@ -832,3 +890,28 @@ export default {
   supportTicket: supportTicketApi,
   withdrawalRequest: withdrawalRequestApi
 };
+<<<<<<< HEAD
+=======
+// I.E. Data interfaces
+export interface IeData {
+  ieDataPkId: number | null;
+  ieName: string;
+  description: string;
+  amount: number;
+  status: string; // e.g. 'ACTIVE' | 'INACTIVE'
+  createdDatetime?: string;
+  lastModifiedDateTime?: string;
+  isDeleted?: boolean;
+  isGenericFlag?: boolean;
+  notesG11nBigTxt?: string | null;
+}
+
+export interface AddIeDataRequest {
+  ieDataPkId: null;
+  ieName: string;
+  description: string;
+  amount: number;
+  status: string;
+}
+
+>>>>>>> 37c7179d20a27f98fe9eb9ee188a63a86806491e

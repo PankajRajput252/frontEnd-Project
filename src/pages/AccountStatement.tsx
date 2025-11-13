@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+ 
 interface AccountStatementRecord {
   accountStatementPkId: number;
   effectiveDateTime: string;
@@ -7,7 +7,7 @@ interface AccountStatementRecord {
   credit: number;
   debit: number;
 }
-
+ 
 export default function AccountStatement() {
   const [statementRecords, setStatementRecords] = useState<AccountStatementRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,11 +16,11 @@ export default function AccountStatement() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
     const nodeId = user?.nodeId;
-
+ 
     if (nodeId) {
       fetchAccountStatement(nodeId);
     } else {
@@ -28,13 +28,13 @@ export default function AccountStatement() {
       setLoading(false);
     }
   }, []);
-
+ 
   const fetchAccountStatement = async (nodeId: string) => {
     try {
       const url = `http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getAccountStatement?page=0&size=50&filterBy=ACTIVE&inputPkId=null&inputFkId=${nodeId}`;
       const res = await fetch(url);
       const data = await res.json();
-
+ 
       if (data.status === "SUCCESS" && Array.isArray(data.data)) {
         setStatementRecords(data.data);
       } else {
@@ -47,20 +47,20 @@ export default function AccountStatement() {
       setLoading(false);
     }
   };
-
+ 
   // Filter records by search term
   const filteredRecords = statementRecords.filter((record) =>
     record.particular?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+ 
   // Pagination
   const totalPages = Math.ceil(filteredRecords.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const currentRecords = filteredRecords.slice(startIndex, endIndex);
-
+ 
   const handlePageChange = (page: number) => setCurrentPage(page);
-
+ 
   const formatDate = (dateString: string) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("en-GB", {
@@ -69,7 +69,7 @@ export default function AccountStatement() {
       year: "numeric",
     });
   };
-
+ 
   return (
     <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10 bg-gray-900 min-h-screen">
       {/* Breadcrumb */}
@@ -83,7 +83,7 @@ export default function AccountStatement() {
           </ol>
         </nav>
       </div>
-
+ 
       {/* Search + Filter Section */}
       <div className="mb-6 bg-gray-800 rounded-xl border border-gray-700 p-6">
         <div className="flex flex-col sm:flex-row gap-4 items-center">
@@ -111,13 +111,13 @@ export default function AccountStatement() {
           </div>
         </div>
       </div>
-
+ 
       {/* Table */}
       <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h3 className="text-white font-bold text-xl">Account Statement</h3>
         </div>
-
+ 
         {loading ? (
           <div className="py-12 text-center text-gray-400">Loading account statement...</div>
         ) : (
@@ -132,7 +132,7 @@ export default function AccountStatement() {
                   <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">Db.</th>
                 </tr>
               </thead>
-
+ 
               <tbody className="divide-y divide-gray-700">
                 {currentRecords.length > 0 ? (
                   currentRecords.map((record, index) => (
@@ -171,7 +171,7 @@ export default function AccountStatement() {
             </table>
           </div>
         )}
-
+ 
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="px-6 py-4 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -190,7 +190,7 @@ export default function AccountStatement() {
               />
               <span>Entries</span>
             </div>
-
+ 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -216,3 +216,4 @@ export default function AccountStatement() {
     </div>
   );
 }
+ 
