@@ -65,7 +65,17 @@ const AccountDetailsCard: React.FC = () => {
       </div>
     );
   }
+  // 🔹 Compute initials if profile image not present
+  const getInitials = (name: string = "") => {
+    const words = name.trim().split(" ");
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (
+      (words[0]?.charAt(0).toUpperCase() || "") +
+      (words[words.length - 1]?.charAt(0).toUpperCase() || "")
+    );
+  };
 
+  const initials = getInitials(userData.name);
   const accountData = [
     { label: "Affiliate ID", value: userData.nodeId || "N/A" },
     { label: "Service", value: userData.userStatus || "Inactive" },
@@ -89,7 +99,7 @@ const AccountDetailsCard: React.FC = () => {
     <div className="p-6 bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-xl h-full flex flex-col border border-gray-200 dark:border-gray-600">
       {/* User Info Section */}
       <div className="flex items-center space-x-4 mb-6">
-        {userData.profileImageUrl ? (
+      {userData.profileImageUrl ? (
           <img
             src={userData.profileImageUrl}
             alt={userData.name}
@@ -97,7 +107,7 @@ const AccountDetailsCard: React.FC = () => {
           />
         ) : (
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            {userData.name?.charAt(0).toUpperCase() || "U"}
+            {initials}
           </div>
         )}
         <div className="flex flex-col">

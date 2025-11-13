@@ -33,17 +33,33 @@ export default function UserDropdown() {
       </Link>
     );
   }
+    // 🔹 Compute initials if profile image not present
+    const getInitials = (name: string = "") => {
+      const words = name.trim().split(" ");
+      if (words.length === 1) return words[0].charAt(0).toUpperCase();
+      return (
+        (words[0]?.charAt(0).toUpperCase() || "") +
+        (words[words.length - 1]?.charAt(0).toUpperCase() || "")
+      );
+    };
+  
+    const initials = getInitials(user?.name);
+  
   return (
+    
     <div className="relative">
       <button
         onClick={toggleDropdown}
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
+        
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
           {user?.profileImageUrl || user?.imageUrl ? (
             <img src={(user.profileImageUrl || user.imageUrl) || ''} alt="User" className="w-full h-full object-cover" />
           ) : (
-            <img src="/images/user/owner.jpg" alt="User" className="w-full h-full object-cover" />
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+              {initials}
+            </div>
           )}
         </span>
 
