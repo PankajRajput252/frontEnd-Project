@@ -54,7 +54,7 @@ export default function Home() {
  
   //   fetchWalletData();
   // }, []);
- 
+ //hello world
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
     const nodeId = user?.nodeId;
