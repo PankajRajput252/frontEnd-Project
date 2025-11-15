@@ -32,8 +32,8 @@ const getInitials = (name: string): string => {
 // Helper function to get card color based on status and position
 const getCardColor = (status: string, position: string): string => {
    if (status === "INACTIVE") return "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800";
-  //  if (position.toLowerCase().includes("senior")) return "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800";
-  // if (position.toLowerCase().includes("manager")) return "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800";
+    if (position.toLowerCase().includes("Left")) return "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800";
+   if (position.toLowerCase().includes("Right")) return "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800";
   // if (position.toLowerCase().includes("lead")) return "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800";
   return "bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700";
 };
