@@ -19,9 +19,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // This code will only run on the client side
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const initialTheme = savedTheme || "light"; // Default to light theme
+    const initialTheme = savedTheme || "light";
 
     setTheme(initialTheme);
     setIsInitialized(true);
@@ -30,10 +29,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (isInitialized) {
       localStorage.setItem("theme", theme);
+
       if (theme === "dark") {
         document.documentElement.classList.add("dark");
+        document.documentElement.style.setProperty(
+          "--custom-dark-bg",
+          "rgb(20 20 20 / var(--tw-bg-opacity,1))"
+        );
       } else {
         document.documentElement.classList.remove("dark");
+        document.documentElement.style.removeProperty("--custom-dark-bg");
       }
     }
   }, [theme, isInitialized]);
@@ -51,7 +56,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;

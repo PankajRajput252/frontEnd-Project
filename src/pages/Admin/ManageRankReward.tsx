@@ -196,7 +196,7 @@ export default function ManageRankReward() {
         </div>
 
         {/* Admin Panel */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl overflow-hidden">
+        <div className="bg-[rgb(16_16_16_/1)] rounded-xl border border-[rgb(35_35_35_/1)] shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-700">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <h3 className="text-white font-bold text-xl">Rank & Reward Management</h3>
