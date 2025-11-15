@@ -296,6 +296,8 @@ const fetchAllTeamData = async () => {
       memberLevel: item.memberLevel,
       position: item.position,
       status: item.status,
+      joiningDate: item.joiningDate,
+      activationDate: item.activationDate,
       rank: item.rank,
     }));
 
