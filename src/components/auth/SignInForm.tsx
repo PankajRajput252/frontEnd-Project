@@ -73,7 +73,6 @@ export default function SignInForm() {
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Access the StyloCoin panel using your userId and passcode!
-
             </p>
           </div>
           <div>
