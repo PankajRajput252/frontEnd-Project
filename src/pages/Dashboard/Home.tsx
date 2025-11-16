@@ -176,6 +176,43 @@ export default function Home() {
                 walletIcon="credit"
               />
             </div>
+            {/* Income Section */}
+                <div className="col-span-12 mb-6 mt-8">
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg className="w-6 h-6 mr-2 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                    </svg>
+                    Income Streams
+                  </h2>
+                </div>
+
+                {/* Income Metrics Grid */}
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Service Generation Income" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Matching Income" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Club Income" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Reward Income" amount="0.00" />
+                </div>
+
+                {/* Additional Income Metrics */}
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Fast Track Bonus" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Mining Profit Sharing" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Mining Generation Income" amount="0.00" />
+                </div>
+                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+                    <DashboardMetricCard title="Node Business Sharing" amount="0.00" />
+                </div>
  
             {/* Account & Business Details */}
             <div className="col-span-12 mb-6 mt-8">
