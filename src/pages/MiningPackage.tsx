@@ -58,13 +58,13 @@ export default function MiningPackage() {
     setLoading(true);
     setError("");
     try {
-      const response = await miningPackageApi.getAll(currentPage, rowsPerPage, filterBy, user?.nodeId || null);
+      const response = await miningPackageApi.getAll(currentPage, rowsPerPage,"MINING",filterBy, user?.nodeId || null);
       const mapped: MiningReportRow[] = (response.content || []).map((item: MiningPackageItem, idx: number) => ({
         id: Number(item.miningPackagePkId ?? idx + 1),
         userId: String(item.userNodeCode ?? "-"),
-        name: String("-"),
+        name: "Mining",
         amount: String(item.packageAmount ?? 0),
-        mode: String(item.mode ?? "NODE"),
+        mode: "MINING",
         date: (() => {
           if (item.timeStamp) {
             return new Date(typeof item.timeStamp === 'number' ? item.timeStamp : parseInt(item.timeStamp)).toLocaleString();
@@ -114,12 +114,13 @@ export default function MiningPackage() {
       miningPackagePkId: null,
       userNodeCode: user?.nodeId || "",
       packageAmount: 250,
-      mode: "NODE",
+      mode: "MINING",
       transactionPassword,
       remarks,
       packageStatus: 'IN_PROGRESS' as const,
       localDateTime: new Date().toISOString(), // Set current date/time
     };
+    console.log("Before API call successful:", payload);
     const result = await miningPackageApi.add(payload);
     console.log("API call successful:", result);
     setSuccess("Mining package activated successfully!");
@@ -165,7 +166,7 @@ export default function MiningPackage() {
         miningPackagePkId: null,
         userNodeCode: user.nodeId,
         packageAmount: 250,
-        mode: "NODE",
+        mode: "MINING",
         transactionPassword,
         remarks,
         packageStatus: 'IN_PROGRESS' as const,
