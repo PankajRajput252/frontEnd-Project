@@ -57,6 +57,7 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminDeposits from "./pages/Admin/AdminDeposits";
 import AdminWalletTransactions from "./pages/Admin/AdminWalletTransactions";
 import AuthTest from "./pages/AuthTest";
+import ManageSubscription from "./pages/Admin/ManageSubscription";
 import Deposit from "./pages/Deposit";
 
 export default function App() {
@@ -141,6 +142,7 @@ export default function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="ranks" element={<ManageRankReward />} />
               <Route path="income-types" element={<ManageIncomeType />} />
+              <Route path="subscription" element={<ManageSubscription />} />
               <Route path="deposits" element={<AdminDeposits />} />
               <Route path="wallet-transactions" element={<AdminWalletTransactions />} />
             </Route>
