@@ -58,6 +58,7 @@ import AdminDeposits from "./pages/Admin/AdminDeposits";
 import AdminWalletTransactions from "./pages/Admin/AdminWalletTransactions";
 import AuthTest from "./pages/AuthTest";
 import ManageSubscription from "./pages/Admin/ManageSubscription";
+import Deposit from "./pages/Deposit";
 
 export default function App() {
   return (
@@ -95,7 +96,8 @@ export default function App() {
             <Route path="miningProfitSharing" element={<MiningProfitSharing />} />
             <Route path="miningGeneration" element={<MiningGenerationIncome />} />
             <Route path="nodeBusinessSharing" element={<NodeBusinessSharing />} />
-            <Route path="depositFund" element={<DepositFund />} />
+            {/* <Route path="depositFund" element={<DepositFund />} /> */}
+            <Route path="depositFund" element={<Deposit />} />
             <Route path="depositConfirmation" element={<DepositConfirmation />} />
             <Route path="depositInvoice" element={<DepositInvoice />} />
             <Route path="rankAndReward" element={<RankAndReward />} />
