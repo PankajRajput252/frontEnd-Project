@@ -8,7 +8,7 @@ const API_BASE_URL =
     : (import.meta.env.PROD ? '' : 'http://localhost:8080');
  
 // Get auth token from localStorage
-const getAuthToken = (): string | null => {
+export const getAuthToken = (): string | null => {
   return localStorage.getItem("stylocoin_token");
 };
  
@@ -906,4 +906,23 @@ export interface AddIeDataRequest {
   description: string;
   amount: number;
   status: string;
+} 
+
+export interface DepositRequest {
+  userNodeId: string;
+  amount: number;
 }
+
+
+export interface PaymentResponse {
+  pay_address: string;
+  pay_amount: number;
+  pay_currency: string;
+  payment_id: string;
+}
+// Wallet Data API functions
+export const depositApi = {
+  add: (data: DepositRequest): Promise<PaymentResponse> =>
+    apiCall<any>('/api/deposit/create', 'POST', data)
+      .then(response => response.data),
+};
