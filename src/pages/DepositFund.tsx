@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { EyeIcon, EyeCloseIcon } from "../icons";
-import api, { AddDepositFundRequest, walletDataApi, WalletData,depositApi } from "../services/api";
+import api, { AddDepositFundRequest, walletDataApi, WalletData, depositApi } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
@@ -21,7 +21,7 @@ interface PaymentResponse {
 }
 export default function DepositFund() {
   const navigate = useNavigate();
-  const [walletData, setWalletData] = useState<WalletData | null>(null);
+  // const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [formData, setFormData] = useState<DepositFundData>({
     currency: "USDT BEP20",
     amount: "",
@@ -31,7 +31,7 @@ export default function DepositFund() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
 
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -42,55 +42,27 @@ export default function DepositFund() {
   const userNodeId = user?.nodeId;
   // const  userNodeId=""  // dynamically change after login
 
- const  depositRequest={
-        userNodeId:userNodeId,
-        amount : parseFloat(formData.amount),
- }
+  const depositRequest = {
+    userNodeId: userNodeId,
+    amount: parseFloat(formData.amount),
+  }
 
-  // const createDeposit = async () => {
-  //     if (!amount) return alert("Enter amount");
-  
 
-  //     setLoading(true);
 
-  //     try {
-      
-  //          const paymentResponse = await depositApi.add(depositRequest);
-
-  //          console.log("Payment Address:", paymentResponse.pay_address);
-  //          console.log("Amount to Pay:", paymentResponse.pay_amount);
-
-      
-  //         setPayment(paymentResponse);
-
-  //         // Generate QR
-  //         setQrCode(
-  //             `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${paymentResponse?.pay_address}`
-  //         );
-
-  //         pollPaymentStatus(paymentResponse.payment_id);
-  //     } catch (error) {
-  //         alert("Error creating deposit");
-  //     }
-
-  //     setLoading(false);
-  // };
-
- 
   const copyAddress = () => {
-      if (payment) {
-          navigator.clipboard.writeText(payment.pay_address);
-          alert("Address copied to clipboard!");
-      }
+    if (payment) {
+      navigator.clipboard.writeText(payment.pay_address);
+      alert("Address copied to clipboard!");
+    }
   };
 
   // Fetch wallet data to get userNodeCode
   useEffect(() => {
     const fetchWalletData = async () => {
       try {
-        const response = await walletDataApi.getAll(0, 1, 'ACTIVE', user?.nodeId || null);
+        const response = await api.depositFund.getAll(0, 1, 'ACTIVE', user?.nodeId || null);
         if (response.content && response.content.length > 0) {
-          setWalletData(response.content[0]);
+          // setWalletData(response.content[0]);
         }
       } catch (err) {
         console.error('Error fetching wallet data:', err);
@@ -125,50 +97,45 @@ export default function DepositFund() {
       }
 
       // Get userNodeCode from wallet data
-      const userNodeCode = walletData?.userNodeCode || "";
+      const userNodeCode = userNodeId|| "";
       if (!userNodeCode) {
         throw new Error("User node code not found. Please ensure your wallet is set up.");
       }
 
-      // const payload: AddDepositFundRequest = {
-      //   depositPkId: null,
-      //   currency: formData.currency,
-      //   amount: parseFloat(formData.amount),
-      //   transactionPassword: formData.transactionPassword,
-      //   userNodeCode: userNodeCode,
-      // };
+      const payload: AddDepositFundRequest = {
+        depositPkId: null,
+        currency: formData.currency,
+        amount: parseFloat(formData.amount),
+        transactionPassword: formData.transactionPassword,
+        userNodeCode: userNodeCode,
+      };
 
-      // const depositResponse = await api.depositFund.add(payload);
-      
-    
+      const depositResponse = await api.depositFund.add(payload);
 
-   
-      
-           const paymentResponse = await depositApi.add(depositRequest);
+      if (depositResponse?.status === "SUCCESS") {
 
-           console.log("Payment Address:", paymentResponse.pay_address);
-           console.log("Amount to Pay:", paymentResponse.pay_amount);
-           setLoading(true);
-      
-          setPayment(paymentResponse);
+        const paymentResponse = await depositApi.add(depositRequest);
 
-          // Generate QR
-          // setQrCode(
-          //     `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${paymentResponse?.pay_address}`
-          // );
+        console.log("Payment Address:", paymentResponse.pay_address);
+        console.log("Amount to Pay:", paymentResponse.pay_amount);
+        setLoading(true);
 
-     
+        setPayment(paymentResponse);
 
-
-      // Navigate to confirmation page with deposit data
-      navigate("/StyloCoin/depositConfirmation", {
-        state: {
-          paymentResponse: paymentResponse,
-          amount: parseFloat(formData.amount),
-          currency: formData.currency,
-          paymentIdValueForPoll:paymentResponse.payment_id
-        },
-      });
+        // Generate QR
+        // setQrCode(
+        //     `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${paymentResponse?.pay_address}`
+        // );
+        // Navigate to confirmation page with deposit data
+        navigate("/StyloCoin/depositConfirmation", {
+          state: {
+            paymentResponse: paymentResponse,
+            amount: parseFloat(formData.amount),
+            currency: formData.currency,
+            paymentIdValueForPoll: paymentResponse.payment_id
+          },
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred. Please try again.");
     } finally {
@@ -256,7 +223,7 @@ export default function DepositFund() {
                     <span className="absolute top-1/2 right-4 z-10 -translate-y-1/2">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g opacity="0.8">
-                          <path fillRule="evenodd" clipRule="evenodd" d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z" fill="#9CA3AF"/>
+                          <path fillRule="evenodd" clipRule="evenodd" d="M5.29289 8.29289C5.68342 7.90237 6.31658 7.90237 6.70711 8.29289L12 13.5858L17.2929 8.29289C17.6834 7.90237 18.3166 7.90237 18.7071 8.29289C19.0976 8.68342 19.0976 9.31658 18.7071 9.70711L12.7071 15.7071C12.3166 16.0976 11.6834 16.0976 11.2929 15.7071L5.29289 9.70711C4.90237 9.31658 4.90237 8.68342 5.29289 8.29289Z" fill="#9CA3AF" />
                         </g>
                       </svg>
                     </span>
@@ -278,9 +245,9 @@ export default function DepositFund() {
                     />
                     <span className="absolute left-4 top-1/2 -translate-y-1/2">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M2 17L12 22L22 17" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M2 12L12 17L22 12" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                   </div>
@@ -301,8 +268,8 @@ export default function DepositFund() {
                     />
                     <span className="absolute left-4 top-1/2 -translate-y-1/2">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 22S2 16 2 9A10 10 0 0 1 12 2A10 10 0 0 1 22 9C22 16 12 22 12 22Z" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="12" cy="9" r="3" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 22S2 16 2 9A10 10 0 0 1 12 2A10 10 0 0 1 22 9C22 16 12 22 12 22Z" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="9" r="3" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                     <button
@@ -329,14 +296,13 @@ export default function DepositFund() {
                         onChange={handleInputChange}
                         className="sr-only"
                       />
-                      <div className={`box mr-4 flex h-6 w-6 items-center justify-center rounded-lg border-2 transition-all ${
-                        formData.checkMeOut 
-                          ? "border-orange-500 bg-orange-500 shadow-lg shadow-orange-500/25" 
+                      <div className={`box mr-4 flex h-6 w-6 items-center justify-center rounded-lg border-2 transition-all ${formData.checkMeOut
+                          ? "border-orange-500 bg-orange-500 shadow-lg shadow-orange-500/25"
                           : "border-gray-600 bg-gray-700 group-hover:border-gray-500"
-                      }`}>
+                        }`}>
                         <span className={`text-white transition-opacity ${formData.checkMeOut ? "opacity-100" : "opacity-0"}`}>
                           <svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path fillRule="evenodd" clipRule="evenodd" d="M11.7071 0.292893C12.0976 0.683417 12.0976 1.31658 11.7071 1.70711L5.41421 8C4.63316 8.78095 3.36684 8.78095 2.58579 8L0.292893 5.70711C-0.0976311 5.31658 -0.0976311 4.68342 0.292893 4.29289C0.683417 3.90237 1.31658 3.90237 1.70711 4.29289L4 6.58579L10.2929 0.292893C10.6834 -0.0976311 11.3166 -0.0976311 11.7071 0.292893Z" fill="currentColor"/>
+                            <path fillRule="evenodd" clipRule="evenodd" d="M11.7071 0.292893C12.0976 0.683417 12.0976 1.31658 11.7071 1.70711L5.41421 8C4.63316 8.78095 3.36684 8.78095 2.58579 8L0.292893 5.70711C-0.0976311 5.31658 -0.0976311 4.68342 0.292893 4.29289C0.683417 3.90237 1.31658 3.90237 1.70711 4.29289L4 6.58579L10.2929 0.292893C10.6834 -0.0976311 11.3166 -0.0976311 11.7071 0.292893Z" fill="currentColor" />
                           </svg>
                         </span>
                       </div>
