@@ -131,6 +131,29 @@ export interface AddIncomeTypeRequest {
   incomeTypeCode: string;
   level: number;
 }
+export interface SubscriptionType {
+  subscriptionDefinitionPkId: number | null;
+  subscriptionName: string;
+  subscriptionCode: string,
+  subscriptionAmount: number;
+  subscriptionStartDateTime?: string | null;
+  subscriptionEndDateTime?: number | null;
+  // Additional fields for updates
+  notesG11nBigTxt?: string | null;
+  effectiveDateTime?: string;
+  saveStateCodeFkId?: string;
+  activeStateCodeFkId?: string;
+  recordStateCodeFkId?: string;
+  createdDatetime?: string;
+  lastModifiedDateTime?: string;
+  isDeleted?: boolean;
+  isGenericFlag?: boolean;
+}
+export interface AddSubscriptionTypeRequest {
+  subscriptionDefinitionPkId: null;
+  subscriptionName: string;
+  subscriptionAmount: number;
+}
  
 // Wallet Data interfaces
 export interface WalletData {
@@ -202,6 +225,26 @@ export const incomeTypeApi = {
   // Delete income type
   delete: (id: number): Promise<void> =>
     apiCall<void>(`/api/admin/deleteIncomeType/${id}`, 'DELETE')
+};
+export const subscriptionIncomeTypeApi = {
+  // Get all subscription types with pagination and filtering
+  getAll: (page: number = 0, size: number = 25, filterBy: string = 'ACTIVE'): Promise<{ content: SubscriptionType[], totalElements: number }> =>
+    apiCall<any>(`/api/admin/getSubscriptionDefinition?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=null`).then(response => ({
+      content: response.data || [],
+      totalElements: response.count || 0
+    })),
+ 
+  // Add new subscription type
+  add: (data: AddSubscriptionTypeRequest): Promise<SubscriptionType> =>
+    apiCall<any>('/api/admin/addSubscriptionDefinition', 'POST', data).then(response => response.data?.[0] || response),
+ 
+  // Update existing subscription type
+  update: (id: number, data: Partial<SubscriptionType>): Promise<SubscriptionType> =>
+    apiCall<any>(`/api/admin/updateSubscriptionDefinition/${id}`, 'PUT', data).then(response => response.data?.[0] || response),
+ 
+  // Delete subscription type
+  delete: (id: number): Promise<void> =>
+    apiCall<void>(`/api/admin/deleteSubscriptionDefinition/${id}`, 'DELETE')
 };
  
 // Wallet Data API functions

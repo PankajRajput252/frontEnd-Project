@@ -1,72 +1,60 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import AdminModal, { FormField } from '../../components/admin/AdminModal';
-import { incomeTypeApi, IncomeType, AddIncomeTypeRequest } from '../../services/api';
+import {subscriptionIncomeTypeApi, SubscriptionType, AddSubscriptionTypeRequest } from '../../services/api';
 
 export default function ManageSubscription() {
-  const [incomeTypes, setIncomeTypes] = useState<IncomeType[]>([]);
+  const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIncomeType, setEditingIncomeType] = useState<IncomeType | null>(null);
+  const [editingIncomeType, setEditingIncomeType] = useState<SubscriptionType | null>(null);
   const [modalError, setModalError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const incomeTypeOptions = useMemo(
-    () => [
-      { value: 'SERVICE_GENERATION', label: 'Service Generation' },
-      { value: 'MATCHING_INCOME', label: 'Matching Income' },
-      { value: 'CLUB_INCOME', label: 'Club Income' },
-      { value: 'REWARD_INCOME', label: 'Reward Income' },
-      { value: 'FAST_TRACK_BONUS', label: 'Fast Track Bonus' },
-      { value: 'MINING_PROFIT_SHARING', label: 'Mining Profit Sharing' },
-      { value: 'MINING_GENERATION', label: 'Mining Generation' },
-      { value: 'NODE_BUSINESS_SHARING', label: 'Node Business Sharing' }
-    ],
-    []
-  );
+  
 
-  // Fetch income types from API
+  // Fetch SubscriptionType types from API
   const fetchIncomeTypes = async () => {
     try {
       setIsLoading(true);
-      const response = await incomeTypeApi.getAll(currentPage - 1, rowsPerPage, 'ACTIVE');
+      const response = await subscriptionIncomeTypeApi.getAll(currentPage - 1, rowsPerPage, 'ACTIVE');
       setIncomeTypes(response.content);
     } catch (error) {
       console.error('Error fetching income types:', error);
       // For now, use mock data if API fails
-      setIncomeTypes([
-        {
-          incomeTypePkId: 1,
-          incomeName: "Service Generation Income",
-          percentage: 10,
-          incomeTypeCode: "SERVICE_GENERATION",
-          level: 1
-        },
-        {
-          incomeTypePkId: 2,
-          incomeName: "Matching Income",
-          percentage: 15,
-          incomeTypeCode: "MATCHING_INCOME",
-          level: 2
-        },
-        {
-          incomeTypePkId: 3,
-          incomeName: "Club Income",
-          percentage: 5,
-          incomeTypeCode: "CLUB_INCOME",
-          level: 3
-        },
-        {
-          incomeTypePkId: 4,
-          incomeName: "Reward Income",
-          percentage: 20,
-          incomeTypeCode: "REWARD_INCOME",
-          level: 4
-        }
-      ]);
+      // setIncomeTypes([
+      //   {
+      //     incomeTypePkId: 1,
+      //     incomeName: "Service Generation Income",
+      //     percentage: 10,
+      //     incomeTypeCode: "SERVICE_GENERATION",
+      //     level: 1
+      //   },
+      //   {
+      //     incomeTypePkId: 2,
+      //     incomeName: "Matching Income",
+      //     percentage: 15,
+      //     incomeTypeCode: "MATCHING_INCOME",
+      //     level: 2
+      //   },
+      //   {
+      //     incomeTypePkId: 3,
+      //     incomeName: "Club Income",
+      //     percentage: 5,
+      //     incomeTypeCode: "CLUB_INCOME",
+      //     level: 3
+      //   },
+      //   {
+      //     incomeTypePkId: 4,
+      //     incomeName: "Reward Income",
+      //     percentage: 20,
+      //     incomeTypeCode: "REWARD_INCOME",
+      //     level: 4
+      //   }
+      // ]);
     } finally {
       setIsLoading(false);
     }
@@ -119,8 +107,8 @@ export default function ManageSubscription() {
     setIsModalOpen(true);
   };
 
-  const handleEditIncomeType = (incomeType: IncomeType) => {
-    setEditingIncomeType(incomeType);
+  const handleEditIncomeType = (subscriptionTypeType: SubscriptionType) => {
+    setEditingIncomeType(subscriptionTypeType);
     setModalError('');
     setIsModalOpen(true);
   };
@@ -131,7 +119,7 @@ export default function ManageSubscription() {
     }
 
     try {
-      await incomeTypeApi.delete(incomeTypeId);
+      await subscriptionIncomeTypeApi.delete(incomeTypeId);
       await fetchIncomeTypes(); // Refresh the list
     } catch (error) {
       console.error('Error deleting income type:', error);
@@ -146,22 +134,19 @@ export default function ManageSubscription() {
 
       if (editingIncomeType) {
         // Update existing income type
-        await incomeTypeApi.update(editingIncomeType.incomeTypePkId!, {
-          incomeName: formData.incomeName,
-          percentage: Number(formData.percentage),
-          incomeTypeCode: formData.incomeTypeCode,
-          level: Number(formData.level)
+        await subscriptionIncomeTypeApi.update(editingIncomeType.subscriptionDefinitionPkId!, {
+          subscriptionName: formData.subscriptionName,
+          subscriptionAmount: Number(formData.amount),
         });
       } else {
         // Add new income type
-        const addData: AddIncomeTypeRequest = {
-          incomeTypePkId: null,
-          incomeName: formData.incomeName,
-          percentage: Number(formData.percentage),
-          incomeTypeCode: formData.incomeTypeCode,
-          level: Number(formData.level)
+        const addData: AddSubscriptionTypeRequest = {
+          subscriptionDefinitionPkId: null,
+          subscriptionName: formData.subscriptionName,
+          subscriptionAmount: Number(formData.amount),
         };
-        await incomeTypeApi.add(addData);
+        console.log(addData);
+        await subscriptionIncomeTypeApi.add(addData);
       }
 
       await fetchIncomeTypes(); // Refresh the list
@@ -175,9 +160,9 @@ export default function ManageSubscription() {
   };
 
   // Filter and paginate income types
-  const filteredIncomeTypes = (incomeTypes || []).filter(incomeType =>
-    incomeType.incomeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (incomeType.incomeTypeCode || '').toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredIncomeTypes = (incomeTypes || []).filter(subscriptionTypes =>
+    subscriptionTypes.subscriptionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (subscriptionTypes.subscriptionName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredIncomeTypes.length / rowsPerPage);
@@ -253,7 +238,7 @@ export default function ManageSubscription() {
           {isLoading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-              <p className="text-gray-400 mt-2">Loading income types...</p>
+              <p className="text-gray-400 mt-2">Loading subscription types...</p>
             </div>
           ) : (
             <>
@@ -271,26 +256,29 @@ export default function ManageSubscription() {
                   </thead>
                   <tbody className="divide-y divide-gray-700">
                     {currentIncomeTypes.length > 0 ? (
-                      currentIncomeTypes.map((incomeType, index) => (
-                        <tr key={incomeType.incomeTypePkId} className="hover:bg-gray-700/50 transition-colors">
+                      currentIncomeTypes.map((subscriptionTypes, index) => (
+                        <tr key={subscriptionTypes.subscriptionDefinitionPkId} className="hover:bg-gray-700/50 transition-colors">
                           <td className="py-4 px-6 text-white font-medium">{startIndex + index + 1}</td>
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-lg">
-                                {getIncomeTypeIcon(incomeType.incomeName)}
+                                {getIncomeTypeIcon(subscriptionTypes.subscriptionName)}
                               </div>
-                              <span className="text-white font-semibold">{incomeType.incomeName}</span>
+                              <span className="text-white font-semibold">{subscriptionTypes.subscriptionName}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-gray-300 font-mono">
-                            {incomeType.incomeTypeCode || '—'}
-                          </td>
                           <td className="py-4 px-6 text-gray-300 font-semibold">
-                            {incomeType.level ?? '—'}
+                            {subscriptionTypes.subscriptionAmount ?? '—'}
                           </td>
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-6 text-gray-300 font-mono">
+                            {subscriptionTypes.subscriptionStartDateTime || '—'}
+                          </td>
+                          <td className="py-4 px-6 text-gray-300 font-mono">
+                            {subscriptionTypes.subscriptionEndDateTime || '—'}
+                          </td>
+                          {/* <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
-                              <span className="text-green-400 font-bold text-lg">{incomeType.percentage}%</span>
+                              <span className="text-green-400 font-bold text-lg">{subscriptionTypes.subscriptionAmount}</span>
                               <div className="w-20 bg-gray-700 rounded-full h-2">
                                 <div 
                                   className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-300"
@@ -298,11 +286,11 @@ export default function ManageSubscription() {
                                 ></div>
                               </div>
                             </div>
-                          </td>
+                          </td> */}
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleEditIncomeType(incomeType)}
+                                onClick={() => handleEditIncomeType(subscriptionTypes)}
                                 className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/20 rounded-lg transition-colors"
                                 title="Edit"
                               >
@@ -311,7 +299,7 @@ export default function ManageSubscription() {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDeleteIncomeType(incomeType.incomeTypePkId!)}
+                                onClick={() => handleDeleteIncomeType(subscriptionTypes.subscriptionDefinitionPkId!)}
                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
                                 title="Delete"
                               >
@@ -330,7 +318,7 @@ export default function ManageSubscription() {
                             <svg className="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <p className="text-lg font-medium">No income types found</p>
+                            <p className="text-lg font-medium">No Subscription types found</p>
                           </div>
                         </td>
                       </tr>
@@ -404,7 +392,7 @@ export default function ManageSubscription() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSubmit={handleModalSubmit}
-          title={editingIncomeType ? 'Edit Income Type' : 'Add New Subscription Type'}
+          title={editingIncomeType ? 'Edit Subscription Type' : 'Add New Subscription Type'}
           fields={incomeTypeFields}
           initialData={editingIncomeType}
           isLoading={isSubmitting}
