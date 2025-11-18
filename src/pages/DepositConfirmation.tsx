@@ -26,11 +26,11 @@ export default function DepositConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
   const [success, setSuccess] = useState<boolean>(false);
+  const [paymentIdValue,setPaymentIdValue]=useState("");
   const [confirmationData, setConfirmationData] = useState<DepositConfirmationData | null>(null);
 
   const pollPaymentStatus = async (paymentId: string) => {
-    if(paymentId=="")
-      return;
+    console.log("paymentId is setting",paymentId)
     try {
       const res = await axios.get(
         `http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/deposit/history/${userNodeId}`
@@ -51,7 +51,7 @@ export default function DepositConfirmation() {
 
   useEffect(() => {
     // Get deposit data from navigation state
-    const state = location.state as { paymentResponse?: PaymentResponse; amount?: number; currency?: string } | null;
+    const state = location.state as { paymentResponse?: PaymentResponse; amount?: number; currency?: string,paymentIdValueForPoll?:string } | null;
     
     if (!state?.paymentResponse) {
       // If no deposit data, redirect back to deposit page
@@ -70,7 +70,7 @@ export default function DepositConfirmation() {
     // Calculate times
     const now = new Date();
     const expiry = new Date(now.getTime() + 3 * 60 * 60 * 1000); // 3 hours from now
-
+    setPaymentIdValue(state.paymentIdValueForPoll ||state.paymentResponse.payment_id)
     setConfirmationData({
       paymentResponse: state.paymentResponse,
       amount: state.amount || state.paymentResponse?.pay_amount || 0,
@@ -82,20 +82,20 @@ export default function DepositConfirmation() {
     });
   }, [location.state, navigate]);
 
-  const paymentId = confirmationData?.paymentId ?? "";
+
 
 
   useEffect(() => {
-    const startPolling = setTimeout(() => {
-      const interval = setInterval(() => {
-        pollPaymentStatus(paymentId);
-      }, 4000);
+    if (!paymentIdValue) return; // Wait until value is set
   
-      return () => clearInterval(interval);
-    }, 15000);
+    console.log("Starting polling for:", paymentIdValue);
   
-    return () => clearTimeout(startPolling);
-  }, []);
+    const interval = setInterval(() => {
+      pollPaymentStatus(paymentIdValue);
+    }, 4000);
+  
+    return () => clearInterval(interval); // Proper cleanup
+  }, [paymentIdValue]);
   
 
   // const generatePaymentId = (): string => {
