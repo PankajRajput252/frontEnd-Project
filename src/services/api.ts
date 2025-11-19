@@ -149,6 +149,27 @@ export interface SubscriptionType {
   isDeleted?: boolean;
   isGenericFlag?: boolean;
 }
+export interface IncomeStreams {
+  individualIncomeSummaryPkId: number | null;
+  serviceGenerationAmount: number;
+  matchingIncomeAmount: number,
+  clubIncomeAmount: number;
+  rewardIncomeAmount?: number;
+  fastTrackBonusAmount?: number;
+  miningProfitSharingAmount?: number;
+  miningGenerationIncomeAmount?: number;
+  nodeBusinessSharingAmount?: number;
+  // Additional fields for updates
+  notesG11nBigTxt?: string | null;
+  effectiveDateTime?: string;
+  saveStateCodeFkId?: string;
+  activeStateCodeFkId?: string;
+  recordStateCodeFkId?: string;
+  createdDatetime?: string;
+  lastModifiedDateTime?: string;
+  isDeleted?: boolean;
+  isGenericFlag?: boolean;
+}
 export interface AddSubscriptionTypeRequest {
   subscriptionDefinitionPkId: null;
   subscriptionName: string;
@@ -255,7 +276,7 @@ export const walletDataApi = {
       content: response.data || [],
       totalElements: response.count || 0
     })),
- 
+  
   // Add new wallet data
   add: (data: AddWalletDataRequest): Promise<WalletData> =>
     apiCall<any>('/api/individual/addWalletData', 'POST', data).then(response => response.data?.[0] || response),
@@ -267,6 +288,21 @@ export const walletDataApi = {
   // Delete wallet data
   delete: (id: number): Promise<void> =>
     apiCall<void>(`/api/individual/deleteWalletData/${id}`, 'DELETE')
+};
+export const incomeStreamsApi ={
+  getAll: (page: number = 0, size: number = 25, filterBy: string = 'ACTIVE', userNodeId?: string | null): Promise<{content: IncomeStreams[],totalElements: number }> =>
+    apiCall<any>(`/api/individual/getIndividualIncomeSummary?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=${userNodeId || 'null'}`).then(response => ({
+      content: response.data || [],
+      totalElements: response.count || 0
+    })),
+}
+export const transferWalletDropdownApi = {
+  // Get wallet transfer dropdown options
+  getDropdownOptions: (userNodeId?: string | null): Promise<{ content: SubscriptionType[], totalElements: number }> =>
+    apiCall<any>(`/api/individual/getHierarchy?loggedInNodeId=${userNodeId || 'null'}`).then(response => ({
+      content: response.data || [],
+      totalElements: response.count || 0
+    }))
 };
  
 // Wallet Transaction interfaces
