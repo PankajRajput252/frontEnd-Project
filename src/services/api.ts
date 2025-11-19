@@ -660,7 +660,7 @@ export const depositFundApi = {
     userNodeId?: string | null
   ): Promise<{ content: DepositFundItem[]; totalElements: number; count?: number }> =>
     apiCall<any>(
-      `/api/individual/getIndividualDepositFund?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=null`
+      `/api/individual/getIndividualDepositFund?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=${userNodeId}`
     ).then((response) => ({
       content: response.data || [],
       totalElements: response.count || 0,
