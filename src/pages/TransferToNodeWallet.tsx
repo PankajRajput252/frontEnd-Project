@@ -119,9 +119,9 @@ export default function TransferToNodeWallet() {
       if (!formData.toWallet) {
         throw new Error("Please select a To Wallet");
       }
-      if (formData.toWallet) {
-        throw new Error("Cannot transfer to the same wallet type");
-      }
+      // if (formData.toWallet) {
+      //   throw new Error("Cannot transfer to the same wallet type");
+      // }
       if (!formData.transferTo) {
         throw new Error("Please enter recipient user ID");
       }
