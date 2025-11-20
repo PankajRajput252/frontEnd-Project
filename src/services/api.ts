@@ -159,6 +159,8 @@ export interface IncomeStreams {
   miningProfitSharingAmount?: number;
   miningGenerationIncomeAmount?: number;
   nodeBusinessSharingAmount?: number;
+  userNodeId:number,
+  userName:string
   // Additional fields for updates
   notesG11nBigTxt?: string | null;
   effectiveDateTime?: string;
@@ -314,7 +316,7 @@ export interface WalletTransaction {
   walletType?: string; // 'MINE' | 'NODE' | 'CAPITAL'
   status?: string; // 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'IN_PROGRESS' | 'SUCCESS' | 'FAILED'
   userFkId?: number;
-  userName?: string | null;
+  userName?: string ;
   fromUserId?: string;
   toUserId?: string;
   fromWallet?: string;

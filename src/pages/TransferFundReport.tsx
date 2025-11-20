@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
+import {walletTransactionApi,WalletTransaction}from "../services/api";
+
 
 interface TransferRecord {
   id: number;
@@ -15,6 +17,50 @@ export default function TransferFundReport() {
   const [searchTerm, setSearchTerm] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+
+  const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
+  const userNodeId = user?.nodeId;
+  // const  userNodeId=""  // dynamically change after login
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+       
+
+      // Fetch transactions
+      try {
+        const transactionsResponse = await walletTransactionApi.getAll(0, 100, 'ACTIVE', user?.nodeId || null);
+        setTransactions(transactionsResponse.content || []);
+      } catch (transactionError) {
+        const errorMessage = transactionError instanceof Error ? transactionError.message : 'Failed to load wallet transactions';
+        // If it's a 404, show a more helpful message
+        if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+          setError('Wallet transactions API endpoint not found. Please ensure the backend endpoint /api/admin/getWalletTransaction is configured.');
+        } else {
+          setError(errorMessage);
+        }
+        console.error('Error fetching transactions:', transactionError);
+        setTransactions([]);
+      }
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Failed to load data';
+      setError(errorMessage);
+      console.error('Error fetching data:', e);
+      setTransactions([]);
+    
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Mock data for transfer fund report
   const [transferRecords] = useState<TransferRecord[]>([
@@ -85,14 +131,17 @@ export default function TransferFundReport() {
   ]);
 
   // Filter records based on search term
-  const filteredRecords = transferRecords.filter(record =>
-    record.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.particular.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecords = transactions.filter(record =>
+    // record.userNodeId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record?.userName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate total amount
-  const totalAmount = filteredRecords.reduce((sum, record) => sum + record.transferAmount, 0);
-
+  const totalAmount = filteredRecords.reduce(
+    (sum, record) => sum + (record?.amount || 0),
+    0
+  ) ;
+  
   // Pagination
   const totalPages = Math.ceil(filteredRecords.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -204,8 +253,9 @@ export default function TransferFundReport() {
               <tr>
                 <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">#</th>
                 <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">User Id</th>
+                <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">User  Name</th>
                 <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">Transfer Amount</th>
-                <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">Receive Amount</th>
+                
                 <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">Particular</th>
                 <th className="text-left py-4 px-6 font-bold text-white text-sm uppercase tracking-wider">Date</th>
               </tr>
@@ -215,11 +265,12 @@ export default function TransferFundReport() {
                 currentRecords.map((record, index) => (
                   <tr key={record.id} className="hover:bg-gray-700/50 transition-colors">
                     <td className="py-4 px-6 text-white font-medium">{startIndex + index + 1}</td>
-                    <td className="py-4 px-6 text-gray-300">{record.userId}</td>
-                    <td className="py-4 px-6 text-white font-semibold">${record.transferAmount.toLocaleString()}</td>
-                    <td className="py-4 px-6 text-green-400 font-semibold">${record.receiveAmount.toLocaleString()}</td>
-                    <td className="py-4 px-6 text-gray-300">{record.particular}</td>
-                    <td className="py-4 px-6 text-gray-300">{formatDate(record.date)}</td>
+                    <td className="py-4 px-6 text-gray-300">{record.toUserId}</td>
+                    <td className="py-4 px-6 text-gray-300">{record.userName}</td>
+                    <td className="py-4 px-6 text-white font-semibold">${record?.amount}</td>
+                    {/* <td className="py-4 px-6 text-green-400 font-semibold">${record.receiveAmount.toLocaleString()}</td> */}
+                    <td className="py-4 px-6 text-gray-300">{record.remarks}</td>
+                    <td className="py-4 px-6 text-gray-300">{formatDate(record?.createdDatetime)}</td>
                   </tr>
                 ))
               ) : (
