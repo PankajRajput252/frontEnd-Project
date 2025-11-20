@@ -1,85 +1,51 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { EyeIcon } from "../icons";
+import {incomeStreamsApi,IncomeStreams} from "../services/api"
 
-interface RewardIncomeRecord {
-  id: number;
-  rank: string;
-  income: string;
-  date: string;
-}
-
-const sampleData: RewardIncomeRecord[] = [
-  {
-    id: 1,
-    rank: "Gold",
-    income: "$2,500.00",
-    date: "2024-01-15"
-  },
-  {
-    id: 2,
-    rank: "Platinum",
-    income: "$3,750.50",
-    date: "2024-01-14"
-  },
-  {
-    id: 3,
-    rank: "Silver",
-    income: "$1,250.75",
-    date: "2024-01-13"
-  },
-  {
-    id: 4,
-    rank: "Diamond",
-    income: "$5,000.25",
-    date: "2024-01-12"
-  },
-  {
-    id: 5,
-    rank: "Gold",
-    income: "$2,100.00",
-    date: "2024-01-11"
-  },
-  {
-    id: 6,
-    rank: "Bronze",
-    income: "$800.00",
-    date: "2024-01-10"
-  },
-  {
-    id: 7,
-    rank: "Platinum",
-    income: "$3,200.50",
-    date: "2024-01-09"
-  },
-  {
-    id: 8,
-    rank: "Gold",
-    income: "$2,800.00",
-    date: "2024-01-08"
-  },
-  {
-    id: 9,
-    rank: "Silver",
-    income: "$1,500.75",
-    date: "2024-01-07"
-  },
-  {
-    id: 10,
-    rank: "Diamond",
-    income: "$4,500.00",
-    date: "2024-01-06"
-  }
-];
 
 export default function RewardIncome() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [incomeData, setIncomeData] = useState<IncomeStreams[]>([]);
+  const [loading,setLoading]=useState(false);
 
-  const filteredData = sampleData.filter(record =>
-    record.rank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.income.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.date.toLowerCase().includes(searchTerm.toLowerCase())
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
+      const nodeId = user?.nodeId;
+
+      if (!nodeId) {
+        console.warn("No nodeId found in localStorage");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        //  WAIT for API response
+        const response = await incomeStreamsApi.getAll(0, 25, 'ACTIVE', nodeId);
+
+        console.log("Income Streams Real Response:", response);
+
+        if (response.content && response.content.length > 0) {
+          setIncomeData(response.content);
+        } else {
+          console.warn("Income streams empty");
+        }
+
+      } catch (err) {
+        console.error("Income API error:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredData = incomeData.filter(record =>
+    record.userName.toLowerCase().includes(searchTerm.toLowerCase()) 
+    // record.income.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // record.date.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -88,10 +54,10 @@ export default function RewardIncome() {
   const currentData = filteredData.slice(startIndex, endIndex);
 
   // Calculate total reward income
-  const totalRewardIncome = sampleData.reduce((sum, record) => {
-    return sum + parseFloat(record.income.replace('$', '').replace(',', ''));
-  }, 0);
-
+  const totalRewardIncome =  filteredData.reduce(
+    (sum, record) => sum + (record?.rewardIncomeAmount || 0),
+    0
+  ) ;
   return (
     <div className="p-6">
       {/* Breadcrumb */}
@@ -140,10 +106,10 @@ export default function RewardIncome() {
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">#</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Rank</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">UserNodeId</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">User Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Income</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,7 +117,7 @@ export default function RewardIncome() {
                   currentData.map((record, index) => (
                     <tr key={record.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{startIndex + index + 1}</td>
-                      <td className="py-3 px-4">
+                      {/* <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           record.rank === 'Diamond' 
                             ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
@@ -165,14 +131,16 @@ export default function RewardIncome() {
                         }`}>
                           {record.rank}
                         </span>
-                      </td>
-                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record.income}</td>
-                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{record.date}</td>
-                      <td className="py-3 px-4">
+                      </td> */}
+                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record.userNodeId}</td>
+                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record.userName}</td>
+                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record.rewardIncomeAmount}</td>
+                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{record.createdDatetime}</td>
+                      {/* <td className="py-3 px-4">
                         <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                           <EyeIcon className="w-4 h-4" />
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 ) : (
