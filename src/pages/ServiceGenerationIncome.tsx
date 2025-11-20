@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { EyeIcon } from "../icons";
+import {incomeStreamsApi,IncomeStreams} from "../services/api"
 
 interface ServiceIncomeRecord {
   id: number;
@@ -10,48 +11,48 @@ interface ServiceIncomeRecord {
   date: string;
 }
 
-const sampleData: ServiceIncomeRecord[] = [
-  {
-    id: 1,
-    userId: "USR001",
-    name: "John Smith",
-    income: "$1,250.00",
-    level: "Gold",
-    date: "2024-01-15"
-  },
-  {
-    id: 2,
-    userId: "USR002",
-    name: "Sarah Johnson",
-    income: "$850.50",
-    level: "Silver",
-    date: "2024-01-14"
-  },
-  {
-    id: 3,
-    userId: "USR003",
-    name: "Mike Davis",
-    income: "$2,100.75",
-    level: "Platinum",
-    date: "2024-01-13"
-  },
-  {
-    id: 4,
-    userId: "USR004",
-    name: "Emily Wilson",
-    income: "$650.25",
-    level: "Bronze",
-    date: "2024-01-12"
-  },
-  {
-    id: 5,
-    userId: "USR005",
-    name: "David Brown",
-    income: "$1,800.00",
-    level: "Gold",
-    date: "2024-01-11"
-  }
-];
+// const sampleData: ServiceIncomeRecord[] = [
+//   {
+//     id: 1,
+//     userId: "USR001",
+//     name: "John Smith",
+//     income: "$1,250.00",
+//     level: "Gold",
+//     date: "2024-01-15"
+//   },
+//   {
+//     id: 2,
+//     userId: "USR002",
+//     name: "Sarah Johnson",
+//     income: "$850.50",
+//     level: "Silver",
+//     date: "2024-01-14"
+//   },
+//   {
+//     id: 3,
+//     userId: "USR003",
+//     name: "Mike Davis",
+//     income: "$2,100.75",
+//     level: "Platinum",
+//     date: "2024-01-13"
+//   },
+//   {
+//     id: 4,
+//     userId: "USR004",
+//     name: "Emily Wilson",
+//     income: "$650.25",
+//     level: "Bronze",
+//     date: "2024-01-12"
+//   },
+//   {
+//     id: 5,
+//     userId: "USR005",
+//     name: "David Brown",
+//     income: "$1,800.00",
+//     level: "Gold",
+//     date: "2024-01-11"
+//   }
+// ];
 
 export default function ServiceGenerationIncome() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,12 +60,46 @@ export default function ServiceGenerationIncome() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [startDate, setStartDate] = useState("07/10/2025");
   const [endDate, setEndDate] = useState("07/10/2025");
+  const [incomeData, setIncomeData] = useState<IncomeStreams[]>([]);
+  const [loading,setLoading]=useState(false);
 
-  const filteredData = sampleData.filter(record =>
-    record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.level.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    record.income.toLowerCase().includes(searchTerm.toLowerCase())
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
+      const nodeId = user?.nodeId;
+
+      if (!nodeId) {
+        console.warn("No nodeId found in localStorage");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // 🔥 WAIT for API response
+        const response = await incomeStreamsApi.getAll(0, 25, 'ACTIVE', nodeId);
+
+        console.log("Income Streams Real Response:", response);
+
+        if (response.content && response.content.length > 0) {
+          setIncomeData(response.content);
+        } else {
+          console.warn("Income streams empty");
+        }
+
+      } catch (err) {
+        console.error("Income API error:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredData = incomeData.filter(record =>
+    record.userName.toLowerCase().includes(searchTerm.toLowerCase()) 
+    // record.userNodeId?.includes(searchTerm) ||
+    // record.level.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // record?.serviceGenerationAmount.includes(searchTerm)
   );
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -76,6 +111,11 @@ export default function ServiceGenerationIncome() {
     // Filter logic would be implemented here based on date range
     console.log("Filtering from:", startDate, "to:", endDate);
   };
+    // Calculate total amount
+    const totalAmount = filteredData.reduce(
+      (sum, record) => sum + (record?.serviceGenerationAmount || 0),
+      0
+    ) ;
 
   return (
     <div className="p-6">
@@ -91,7 +131,7 @@ export default function ServiceGenerationIncome() {
       <div className="mb-6">
         <div className="bg-orange-500 rounded-lg p-6 text-white">
           <h2 className="text-lg font-medium">Total Income!</h2>
-          <p className="text-2xl font-bold mt-2">$6,651.50</p>
+          <p className="text-2xl font-bold mt-2">${totalAmount}</p>
         </div>
       </div>
 
@@ -176,9 +216,9 @@ export default function ServiceGenerationIncome() {
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">User ID</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Income</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Level</th>
+                  {/* <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Level</th> */}
                   <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Action</th>
+                  {/* <th className="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Action</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -186,10 +226,10 @@ export default function ServiceGenerationIncome() {
                   currentData.map((record, index) => (
                     <tr key={record.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{startIndex + index + 1}</td>
-                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">{record.userId}</td>
-                      <td className="py-3 px-4 text-gray-900 dark:text-white">{record.name}</td>
-                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record.income}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium">{record?.userNodeId}</td>
+                      <td className="py-3 px-4 text-gray-900 dark:text-white">{record?.userName}</td>
+                      <td className="py-3 px-4 text-gray-900 dark:text-white font-medium text-green-600 dark:text-green-400">{record?.serviceGenerationAmount}</td>
+                      {/* <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           record.level === 'Platinum' 
                             ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
@@ -201,13 +241,13 @@ export default function ServiceGenerationIncome() {
                         }`}>
                           {record.level}
                         </span>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{record.date}</td>
-                      <td className="py-3 px-4">
+                      </td> */}
+                      <td className="py-3 px-4 text-gray-600 dark:text-gray-300">{record?.createdDatetime}</td>
+                      {/* <td className="py-3 px-4">
                         <button className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                           <EyeIcon className="w-4 h-4" />
                         </button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 ) : (
