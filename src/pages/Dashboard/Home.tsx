@@ -58,36 +58,36 @@ export default function Home() {
   // }, []);
   //hello world
   useEffect(() => {
-  const fetchData = async () => {
-    const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
-    const nodeId = user?.nodeId;
+    const fetchData = async () => {
+      const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
+      const nodeId = user?.nodeId;
 
-    if (!nodeId) {
-      console.warn("No nodeId found in localStorage");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // 🔥 WAIT for API response
-      const response = await incomeStreamsApi.getAll(0, 25, 'ACTIVE', nodeId);
-
-      console.log("Income Streams Real Response:", response);
-
-      if (response.content && response.content.length > 0) {
-        setIncomeData(response.content);
-      } else {
-        console.warn("Income streams empty");
+      if (!nodeId) {
+        console.warn("No nodeId found in localStorage");
+        setLoading(false);
+        return;
       }
 
-      fetchWalletData(nodeId);
-    } catch (err) {
-      console.error("Income API error:", err);
-    }
-  };
+      try {
+        // 🔥 WAIT for API response
+        const response = await incomeStreamsApi.getAll(0, 25, 'ACTIVE', nodeId);
 
-  fetchData();
-}, []);
+        console.log("Income Streams Real Response:", response);
+
+        if (response.content && response.content.length > 0) {
+          setIncomeData(response.content);
+        } else {
+          console.warn("Income streams empty");
+        }
+
+        fetchWalletData(nodeId);
+      } catch (err) {
+        console.error("Income API error:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
 
   const fetchWalletData = async (nodeId: string) => {
@@ -192,7 +192,7 @@ export default function Home() {
                 amount={
                   loading
                     ? "Loading..."
-                    : `${wallet.totalCredit.toFixed(2)} / ${wallet.totalDebit.toFixed(2)}`
+                    : `${wallet?.totalCredit.toFixed(2)} / ${wallet.totalDebit.toFixed(2)}`
                 }
                 colorClass="bg-gradient-to-br from-purple-500 to-pink-600"
                 isWallet={true}
@@ -211,30 +211,34 @@ export default function Home() {
 
             {/* Income Metrics Grid */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Service Generation Income" amount="0.00" />
+  <DashboardMetricCard
+    title="Service Generation Income"
+    amount={incomeData?.[0]?.serviceGenerationAmount ?? 0}
+  />
+</div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Matching Income" amount={(incomeData?.[0]?.serviceGenerationAmount ?? 0).toString()}
+ />
             </div>
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Matching Income" amount="0.00" />
+              <DashboardMetricCard title="Club Income" amount={(incomeData?.[0]?.clubIncomeAmount ?? 0).toString()} />
             </div>
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Club Income" amount="0.00" />
-            </div>
-            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Reward Income" amount="0.00" />
+              <DashboardMetricCard title="Reward Income" amount={(incomeData?.[0]?.rewardIncomeAmount ?? 0).toString()} />
             </div>
 
             {/* Additional Income Metrics */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Fast Track Bonus" amount="0.00" />
+              <DashboardMetricCard title="Fast Track Bonus" amount={(incomeData?.[0]?.fastTrackBonusAmount ?? 0).toString()} />
             </div>
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Mining Profit Sharing" amount="0.00" />
+              <DashboardMetricCard title="Mining Profit Sharing" amount={(incomeData?.[0]?.miningProfitSharingAmount ?? 0).toString()} />
             </div>
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Mining Generation Income" amount="0.00" />
+              <DashboardMetricCard title="Mining Generation Income" amount={(incomeData?.[0]?.miningGenerationIncomeAmount ?? 0).toString()} />
             </div>
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-              <DashboardMetricCard title="Node Business Sharing" amount="0.00" />
+              <DashboardMetricCard title="Node Business Sharing" amount={(incomeData?.[0]?.nodeBusinessSharingAmount ?? 0).toString()} />
             </div>
 
             {/* Account & Business Details */}
