@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { EyeIcon, EyeCloseIcon } from "../icons";
-import { walletTransferApi, walletDataApi, WalletData } from "../services/api";
+import { walletTransferApi, walletDataApi, WalletData,transferWalletDropdownApi, SubscriptionType } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 interface TransferData {
@@ -17,6 +17,8 @@ interface TransferData {
 export default function TransferToCapitalWallet() {
   const { user } = useAuth();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
+  const [dropDownData, setDropDownData] = useState<SubscriptionType[]>([]);
+  console.log("Dropdown Data in Transfer to Node Wallet Page:", dropDownData);
   const [formData, setFormData] = useState<TransferData>({
     // fromWallet: "",
     toWallet: "",
@@ -39,8 +41,11 @@ export default function TransferToCapitalWallet() {
     const fetchWalletData = async () => {
       try {
         const response = await walletDataApi.getAll(0, 1, 'ACTIVE', user?.nodeId || null);
+        const response2 = await transferWalletDropdownApi.getDropdownOptions(user?.nodeId || null);
+        console.log("Dropdown Data: bibek singh", response2.content);
         if (response.content && response.content.length > 0) {
           setWalletData(response.content[0]);
+          setDropDownData(response2.content);
         }
       } catch (err) {
         console.error('Error fetching wallet data:', err);
@@ -119,9 +124,6 @@ export default function TransferToCapitalWallet() {
       if (!formData.toWallet) {
         throw new Error("Please select a To Wallet");
       }
-      if (formData.toWallet) {
-        throw new Error("Cannot transfer to the same wallet type");
-      }
       if (!formData.transferTo) {
         throw new Error("Please enter recipient user ID");
       }
@@ -151,13 +153,20 @@ export default function TransferToCapitalWallet() {
       if (!toWalletType) {
         throw new Error("Invalid wallet type selected");
       }
+      const selectedMember = dropDownData.find(member =>
+        member.memberId === formData.transferTo
+      );
+
+      if (!selectedMember) {
+        throw new Error("Selected member not found");
+      }
 
       // Prepare API request body
       const transferRequest = {
         walletTxnPkId: null,
         transactionId: null,
         fromUserId: fromUserId,
-        toUserId: formData.transferTo.trim(),
+        toUserId: selectedMember.memberId,
         toWallet: toWalletType,
         amount: parseFloat(formData.amount),
         status: "IN_PROGRESS" as const,
@@ -169,6 +178,7 @@ export default function TransferToCapitalWallet() {
       await walletTransferApi.create(transferRequest);
 
       const toWalletLabel = walletTypes.find(w => w.value === formData.toWallet)?.label || "Wallet";
+      const memberName = selectedMember.memberName;
       setSuccess(`Transfer completed successfully! Funds have been transferred to the ${toWalletLabel}.`);
       setFormData({
         // fromWallet: "",
@@ -333,9 +343,6 @@ export default function TransferToCapitalWallet() {
                         </svg>
                       </span>
                     </div>
-                    {formData.toWallet &&(
-                      <p className="mt-2 text-sm text-red-400">Cannot transfer to the same wallet type</p>
-                    )}
                   </div>
                 </div>
 
@@ -343,15 +350,26 @@ export default function TransferToCapitalWallet() {
                   <label className="mb-3 block text-white font-medium text-lg">
                     To User ID
                   </label>
-                  <div className="relative">
-                    <input
-                      type="text"
+                  <div className="relative z-20">
+                    <select
                       name="transferTo"
                       value={formData.transferTo}
                       onChange={handleInputChange}
-                      placeholder="Enter recipient user ID (e.g., NODE123457)"
-                      className="w-full rounded-lg border-2 border-gray-600 bg-gray-700 py-4 pl-12 pr-6 text-white font-medium outline-none transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 hover:border-gray-500 placeholder-gray-400"
-                    />
+                      className="relative z-20 w-full appearance-none rounded-lg border-2 border-gray-600 bg-gray-700 py-4 pl-12 pr-6 text-white outline-none transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 hover:border-gray-500"
+                    >
+                      <option value="" className="bg-gray-700">
+                        Select a recipient
+                      </option>
+                      {dropDownData.map((member) => (
+                        <option
+                          key={member.memberId}
+                          value={member.memberId}
+                          className="bg-gray-700"
+                        >
+                          {member.memberName} | {member.memberId}
+                        </option>
+                      ))}
+                    </select>
                     <span className="absolute left-4 top-1/2 -translate-y-1/2">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

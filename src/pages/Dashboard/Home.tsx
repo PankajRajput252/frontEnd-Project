@@ -3,7 +3,7 @@ import PageMeta from "../../components/common/PageMeta";
 import DashboardMetricCard from "../../components/dashboard/DashboardMetricCard";
 import AccountDetailsCard from "../../components/dashboard/AccountDetailsCard";
 import BusinessDetailsCard from "../../components/dashboard/BusinessDetailsCard";
- 
+import { incomeStreamsApi, IncomeStreams } from "../../services/api";
 interface WalletData {
   mineWallet: number;
   nodeWallet: number;
@@ -11,7 +11,7 @@ interface WalletData {
   totalCredit: number;
   totalDebit: number;
 }
- 
+
 export default function Home() {
   const [wallet, setWallet] = useState<WalletData>({
     mineWallet: 0,
@@ -20,19 +20,21 @@ export default function Home() {
     totalCredit: 0,
     totalDebit: 0,
   });
- 
+
   const [loading, setLoading] = useState<boolean>(true);
- 
+  const [incomeData, setIncomeData] = useState<IncomeStreams[]>([]);
+  console.log("Income Data: jjh", incomeData[0]);
+
   // useEffect(() => {
-   
+
   //   const fetchWalletData = async () => {
   //     try {
   //       const response = await fetch(
   //         "http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getWalletData?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=NODE24212301%22
   //       );
- 
+
   //       const data = await response.json();
- 
+
   //       if (data.status === "SUCCESS" && data.data?.length > 0) {
   //         const walletInfo = data.data[0];
   //         setWallet({
@@ -51,28 +53,49 @@ export default function Home() {
   //       setLoading(false);
   //     }
   //   };
- 
+
   //   fetchWalletData();
   // }, []);
- //hello world
+  //hello world
   useEffect(() => {
+  const fetchData = async () => {
     const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
     const nodeId = user?.nodeId;
- 
-    if (nodeId) {
-      fetchWalletData(nodeId);
-    } else {
+
+    if (!nodeId) {
       console.warn("No nodeId found in localStorage");
       setLoading(false);
+      return;
     }
-  }, []);
- 
+
+    try {
+      // 🔥 WAIT for API response
+      const response = await incomeStreamsApi.getAll(0, 25, 'ACTIVE', nodeId);
+
+      console.log("Income Streams Real Response:", response);
+
+      if (response.content && response.content.length > 0) {
+        setIncomeData(response.content);
+      } else {
+        console.warn("Income streams empty");
+      }
+
+      fetchWalletData(nodeId);
+    } catch (err) {
+      console.error("Income API error:", err);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
   const fetchWalletData = async (nodeId: string) => {
     try {
       const url = `http://minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getWalletData?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=${nodeId}`;
       const response = await fetch(url);
       const data = await response.json();
- 
+
       if (data.status === "SUCCESS" && data.data?.length > 0) {
         const walletInfo = data.data[0];
         setWallet({
@@ -91,17 +114,17 @@ export default function Home() {
       setLoading(false);
     }
   };
- 
+
   return (
     <>
       <PageMeta
         title="StyloCoin Dashboard"
         description="Affiliate and Mining Dashboard"
       />
- 
+
       {/* Main Layout Container */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-white">
-       
+
         {/* Header Section */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-b-2xl shadow-2xl">
           <div className="flex items-center justify-between">
@@ -117,21 +140,21 @@ export default function Home() {
             </div>
           </div>
         </div>
- 
+
         {/* Scrollable Main Content */}
         <main className="p-6">
           <div className="grid grid-cols-12 gap-6">
- 
+
             {/* Wallet Section Header */}
             <div className="col-span-12 mb-6">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-yellow-500 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/>
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
                 </svg>
                 Wallets
               </h2>
             </div>
- 
+
             {/* Wallet Cards */}
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
               <DashboardMetricCard
@@ -142,7 +165,7 @@ export default function Home() {
                 walletIcon="mine"
               />
             </div>
- 
+
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
               <DashboardMetricCard
                 title="Node Wallet"
@@ -152,7 +175,7 @@ export default function Home() {
                 walletIcon="node"
               />
             </div>
- 
+
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
               <DashboardMetricCard
                 title="Capital Wallet"
@@ -162,7 +185,7 @@ export default function Home() {
                 walletIcon="capital"
               />
             </div>
- 
+
             <div className="col-span-12 sm:col-span-6 lg:col-span-3">
               <DashboardMetricCard
                 title="Total Credit / Debit"
@@ -177,57 +200,57 @@ export default function Home() {
               />
             </div>
             {/* Income Section */}
-                <div className="col-span-12 mb-6 mt-8">
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                    <svg className="w-6 h-6 mr-2 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                    </svg>
-                    Income Streams
-                  </h2>
-                </div>
+            <div className="col-span-12 mb-6 mt-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <svg className="w-6 h-6 mr-2 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                Income Streams
+              </h2>
+            </div>
 
-                {/* Income Metrics Grid */}
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Service Generation Income" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Matching Income" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Club Income" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Reward Income" amount="0.00" />
-                </div>
+            {/* Income Metrics Grid */}
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Service Generation Income" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Matching Income" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Club Income" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Reward Income" amount="0.00" />
+            </div>
 
-                {/* Additional Income Metrics */}
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Fast Track Bonus" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Mining Profit Sharing" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Mining Generation Income" amount="0.00" />
-                </div>
-                <div className="col-span-12 sm:col-span-6 lg:col-span-3">
-                    <DashboardMetricCard title="Node Business Sharing" amount="0.00" />
-                </div>
- 
+            {/* Additional Income Metrics */}
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Fast Track Bonus" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Mining Profit Sharing" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Mining Generation Income" amount="0.00" />
+            </div>
+            <div className="col-span-12 sm:col-span-6 lg:col-span-3">
+              <DashboardMetricCard title="Node Business Sharing" amount="0.00" />
+            </div>
+
             {/* Account & Business Details */}
             <div className="col-span-12 mb-6 mt-8">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                 </svg>
                 Account & Business Details
               </h2>
             </div>
- 
+
             <div className="col-span-12 lg:col-span-5">
               <AccountDetailsCard />
             </div>
- 
+
             <div className="col-span-12 lg:col-span-7">
               <BusinessDetailsCard />
             </div>
@@ -237,4 +260,3 @@ export default function Home() {
     </>
   );
 }
- 
