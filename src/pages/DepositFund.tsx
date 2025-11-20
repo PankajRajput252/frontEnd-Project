@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { EyeIcon, EyeCloseIcon } from "../icons";
-import api, { AddDepositFundRequest, walletDataApi, WalletData, depositApi } from "../services/api";
+import api, { AddDepositFundRequest, walletDataApi, WalletData, depositApi,subscriptionIncomeTypeApi , SubscriptionType} from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
@@ -21,10 +21,12 @@ interface PaymentResponse {
 }
 export default function DepositFund() {
   const navigate = useNavigate();
+  const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
+
   // const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [formData, setFormData] = useState<DepositFundData>({
     currency: "USDT BEP20",
-    amount: "",
+    amount: String( incomeTypes[0]?.subscriptionAmount ),
     transactionPassword: "",
     checkMeOut: false,
   });
@@ -38,20 +40,32 @@ export default function DepositFund() {
   const [payment, setPayment] = useState<PaymentResponse | null>(null);
   const [qrCode, setQrCode] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
   const userNodeId = user?.nodeId;
   // const  userNodeId=""  // dynamically change after login
 
  
 
-
-
-  const copyAddress = () => {
-    if (payment) {
-      navigator.clipboard.writeText(payment.pay_address);
-      alert("Address copied to clipboard!");
+  const fetchIncomeTypes = async () => {
+    try {
+      setIsLoading(true);
+      const response = await subscriptionIncomeTypeApi.getAll(currentPage - 1, rowsPerPage, 'ACTIVE');
+      setIncomeTypes(response.content);
+    } catch (error) {
+      console.error('Error fetching income types:', error);
+    
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchIncomeTypes();
+  }, [currentPage, rowsPerPage]);
+
 
   // Fetch wallet data to get userNodeCode
   useEffect(() => {
@@ -102,7 +116,7 @@ export default function DepositFund() {
       const payload: AddDepositFundRequest = {
         depositPkId: null,
         currency: formData.currency,
-        amount: parseFloat(formData.amount),
+        amount: incomeTypes[0]?.subscriptionAmount,
         transactionPassword: formData.transactionPassword,
         userNodeCode: userNodeCode,
       };
@@ -113,7 +127,7 @@ export default function DepositFund() {
        console.log("priniting value--->",depositResponse?.response?.depositPkId)
         const depositRequest = {
           userNodeId: userNodeId,
-          amount: parseFloat(formData.amount),
+          amount: incomeTypes[0]?.subscriptionAmount,
           depositPkId:depositResponse?.response?.depositPkId
         }
         console.log("priniting value h--->",depositRequest)
@@ -133,7 +147,7 @@ export default function DepositFund() {
         navigate("/StyloCoin/depositConfirmation", {
           state: {
             paymentResponse: paymentResponse,
-            amount: parseFloat(formData.amount),
+            amount: incomeTypes[0]?.subscriptionAmount,
             currency: formData.currency,
             paymentIdValueForPoll: paymentResponse.payment_id
           },
@@ -241,8 +255,10 @@ export default function DepositFund() {
                     <input
                       type="number"
                       name="amount"
-                      value={formData.amount}
+                      // value={formData.amount}
+                      value={incomeTypes[0]?.subscriptionAmount}
                       onChange={handleInputChange}
+                      disabled
                       placeholder="Enter amount in USD"
                       className="w-full rounded-lg border-2 border-gray-600 bg-gray-700 py-4 pl-12 pr-6 text-white font-medium outline-none transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 hover:border-gray-500 placeholder-gray-400"
                     />

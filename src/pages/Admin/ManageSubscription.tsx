@@ -24,37 +24,7 @@ export default function ManageSubscription() {
       setIncomeTypes(response.content);
     } catch (error) {
       console.error('Error fetching income types:', error);
-      // For now, use mock data if API fails
-      // setIncomeTypes([
-      //   {
-      //     incomeTypePkId: 1,
-      //     incomeName: "Service Generation Income",
-      //     percentage: 10,
-      //     incomeTypeCode: "SERVICE_GENERATION",
-      //     level: 1
-      //   },
-      //   {
-      //     incomeTypePkId: 2,
-      //     incomeName: "Matching Income",
-      //     percentage: 15,
-      //     incomeTypeCode: "MATCHING_INCOME",
-      //     level: 2
-      //   },
-      //   {
-      //     incomeTypePkId: 3,
-      //     incomeName: "Club Income",
-      //     percentage: 5,
-      //     incomeTypeCode: "CLUB_INCOME",
-      //     level: 3
-      //   },
-      //   {
-      //     incomeTypePkId: 4,
-      //     incomeName: "Reward Income",
-      //     percentage: 20,
-      //     incomeTypeCode: "REWARD_INCOME",
-      //     level: 4
-      //   }
-      // ]);
+    
     } finally {
       setIsLoading(false);
     }
