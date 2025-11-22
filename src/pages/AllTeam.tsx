@@ -347,11 +347,11 @@ console.log("Checking data ----->" ,teamData)
       </div>
 
       {/* Summary Box */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg border-2 border-orange-500 p-6">
           <h2 className="text-orange-500 text-xl font-semibold">Total Amount!</h2>
         </div>
-      </div>
+      </div> */}
 
       {/* Filter Section */}
       <div className="mb-6">

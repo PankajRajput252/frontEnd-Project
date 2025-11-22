@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
     name: "Settings",
     subItems: [
       { name: "Profile", path: "profile", pro: false },
-      { name: "wallet", path: "wallet", pro: false },
+      // { name: "wallet", path: "wallet", pro: false },
       { name: "Wallet Address", path: "walletAddress", pro: false },
     ],
     path: "settings",
@@ -128,16 +128,16 @@ const componentsItems: NavItem[] = [
       { name: "Receive Report", path: "receiveReport", pro: false },
       ],
   },
-  {
-    icon: (
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 7H3C1.9 7 1 7.9 1 9V19C1 20.1 1.9 21 3 21H21C22.1 21 23 20.1 23 19V9C23 7.9 22.1 7 21 7ZM21 19H3V9H21V19ZM12 12C13.1 12 14 11.1 14 10C14 8.9 13.1 8 12 8C10.9 8 10 8.9 10 10C10 11.1 10.9 12 12 12ZM12 14C9.79 14 8 12.21 8 10C8 7.79 9.79 6 12 6C14.21 6 16 7.79 16 10C16 12.21 14.21 14 12 14Z"
-          className="fill-current" />
-      </svg>
-    ),
-    name: "My Wallet",
-    path: "user-wallet",
-  },
+  // {
+  //   icon: (
+  //     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //       <path d="M21 7H3C1.9 7 1 7.9 1 9V19C1 20.1 1.9 21 3 21H21C22.1 21 23 20.1 23 19V9C23 7.9 22.1 7 21 7ZM21 19H3V9H21V19ZM12 12C13.1 12 14 11.1 14 10C14 8.9 13.1 8 12 8C10.9 8 10 8.9 10 10C10 11.1 10.9 12 12 12ZM12 14C9.79 14 8 12.21 8 10C8 7.79 9.79 6 12 6C14.21 6 16 7.79 16 10C16 12.21 14.21 14 12 14Z"
+  //         className="fill-current" />
+  //     </svg>
+  //   ),
+  //   name: "My Wallet",
+  //   path: "user-wallet",
+  // },
   {
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

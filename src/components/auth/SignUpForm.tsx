@@ -44,9 +44,16 @@ export default function SignUpForm() {
       return;
     }
 
+    if(!referralCode){
+      
+     setReferralCode("NODE24770625")
+     console.log("Please referal --->",referralCode);
+    }
+
     setIsLoading(true);
 
     try {
+      console.log("Please referal  565--->",referralCode);
       const result = await signUp(name, email, password, mobile, country, referralCode, position);
       if (result.success) {
         setSuccess(result.message || "Registration successful!");
@@ -237,7 +244,11 @@ export default function SignUpForm() {
                       name="referralCode"
                       placeholder="Enter Your Referral Code"
                       value={referralCode}
-                      onChange={(e) => setReferralCode(e.target.value)}
+                      // onChange={(e) => setReferralCode(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setReferralCode(value == "" ? "NODE24770625" : value);
+                      }}
                     />
                   </div>
                   <div>

@@ -6,6 +6,7 @@ import axios from "axios";
 
 const user = JSON.parse(localStorage.getItem("stylocoin_user") || "{}");
 const userNodeId = user?.nodeId;
+console.log("loggedInPrnId for history",userNodeId)
 
 interface DepositConfirmationData {
   paymentResponse: PaymentResponse;
