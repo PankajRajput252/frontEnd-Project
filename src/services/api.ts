@@ -372,7 +372,12 @@ export const walletDataApi = {
  
   // Delete wallet data
   delete: (id: number): Promise<void> =>
-    apiCall<void>(`/api/individual/deleteWalletData/${id}`, 'DELETE')
+    apiCall<void>(`/api/individual/deleteWalletData/${id}`, 'DELETE'),
+
+    // Add new wallet data
+  addOtp: (email: string , userNodeId?: string | null): Promise<UsersResponse> =>
+      apiCall<any>(`/api/individual/sendEmailOtp?email=${email}&userNodeId=${userNodeId}`, 'POST').then(response => response.data?.[0] || response),
+   
 };
 export const incomeStreamsApi ={
   getAll: (page: number = 0, size: number = 25, filterBy: string = 'ACTIVE', userNodeId?: string | null): Promise<{content: IncomeStreams[],totalElements: number }> =>
