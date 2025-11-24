@@ -437,7 +437,7 @@ export default function ManagerWithdrawal() {
     try {
         setIsLoading(true);
         // Call your approve API
-        await manageWithdrawalApi.approve(withdrawal.withdrawalRequestPkId!);
+        await manageWithdrawalApi.add(withdrawal?.withdrawalRequestPkId);
         await fetchWithdrawals(); // Refresh the list
         alert('Withdrawal approved successfully!');
     } catch (error) {
@@ -456,7 +456,7 @@ const handleRejectWithdrawal = async (withdrawal: WithdrawalType) => {
     try {
         setIsLoading(true);
         // Call your reject API
-        await manageWithdrawalApi.reject(withdrawal.withdrawalRequestPkId!);
+        await manageWithdrawalApi.reject(withdrawal.withdrawalRequestPkId);
         await fetchWithdrawals(); // Refresh the list
         alert('Withdrawal rejected successfully!');
     } catch (error) {
@@ -652,7 +652,7 @@ const handleRejectWithdrawal = async (withdrawal: WithdrawalType) => {
                                                         {formatAmount(withdrawal.finalAmount)}
                                                     </td>
                                                     <td className="py-4 px-6 text-orange-400 font-mono font-bold">
-                                                        {formatAmount(withdrawal.requestedAmount)}
+                                                        {formatAmount(withdrawal.amount)}
                                                     </td>
                                                     <td className="py-4 px-6 text-gray-300">
                                                         {formatDate(withdrawal.createdDatetime)}

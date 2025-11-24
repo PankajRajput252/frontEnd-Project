@@ -351,6 +351,13 @@ export const manageWithdrawalApi={
       content: response.data || [],
       totalElements: response.count || 0
     })),
+    // addOtp: (email: string , userNodeId?: string | null): Promise<UsersResponse> =>
+    //   apiCall<any>(`/api/individual/sendEmailOtp?email=${email}&userNodeId=${userNodeId}`, 'POST').then(response => response.data?.[0] || response)
+    add: (withdrawalRequestPkId: number | null): Promise<SubscriptionType> =>
+    apiCall<any>(`/api/withdraw/approve/${withdrawalRequestPkId}`, 'POST').then(response => response.data?.[0] || response),
+    //reject withdrawal
+    reject: (withdrawalRequestPkId: number | null): Promise<SubscriptionType> =>
+      apiCall<any>(`/api/withdraw/reject/${withdrawalRequestPkId}`, 'PUT').then(response => response.data?.[0] || response),
 }
  
 // Wallet Data API functions
