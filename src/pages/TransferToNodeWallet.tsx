@@ -212,7 +212,7 @@ export default function TransferToNodeWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-yellow-200 text-sm font-medium">Mine Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.mineWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.mineWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-yellow-500/20 rounded-full">
               <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@ export default function TransferToNodeWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-200 text-sm font-medium">Node Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.nodeWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.nodeWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-green-500/20 rounded-full">
               <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@ export default function TransferToNodeWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-200 text-sm font-medium">Capital Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.capitalWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.capitalWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-blue-500/20 rounded-full">
               <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

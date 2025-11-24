@@ -40,7 +40,7 @@ export default function TransferToCapitalWallet() {
   useEffect(() => {
     const fetchWalletData = async () => {
       try {
-        const response = await walletDataApi.getAll(0, 1, 'ACTIVE', user?.nodeId || null);
+        const response = await walletDataApi.getAll(0, 100, 'ACTIVE', user?.nodeId || null);
         const response2 = await transferWalletDropdownApi.getDropdownOptions(user?.nodeId || null);
         console.log("Dropdown Data: bibek singh", response2.content);
         if (response.content && response.content.length > 0) {
@@ -220,7 +220,7 @@ export default function TransferToCapitalWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-yellow-200 text-sm font-medium">Mine Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.mineWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.mineWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-yellow-500/20 rounded-full">
               <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +234,7 @@ export default function TransferToCapitalWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-200 text-sm font-medium">Node Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.nodeWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.nodeWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-green-500/20 rounded-full">
               <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,7 +248,7 @@ export default function TransferToCapitalWallet() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-200 text-sm font-medium">Capital Wallet</p>
-              <p className="text-white text-3xl font-bold">${walletBalances.capitalWallet.toLocaleString()}</p>
+              <p className="text-white text-3xl font-bold">${walletData?.capitalWallet.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-blue-500/20 rounded-full">
               <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
