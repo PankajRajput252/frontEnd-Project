@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import AdminModal, { FormField } from '../../components/admin/AdminModal';
+import { PopupModal } from '../Dashboard/PopupModal';
 import { incomeTypeApi, IncomeType, AddIncomeTypeRequest } from '../../services/api';
 
 export default function ManageIncomeType() {
@@ -13,6 +14,11 @@ export default function ManageIncomeType() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Popup Modal States for Delete Confirmation
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [incomeTypeToDelete, setIncomeTypeToDelete] = useState<IncomeType | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const incomeTypeOptions = useMemo(
     () => [
@@ -125,18 +131,35 @@ export default function ManageIncomeType() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteIncomeType = async (incomeTypeId: number) => {
-    if (!window.confirm('Are you sure you want to delete this income type?')) {
-      return;
-    }
+  const handleDeleteClick = (incomeType: IncomeType) => {
+    setIncomeTypeToDelete(incomeType);
+    setShowDeletePopup(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!incomeTypeToDelete) return;
 
     try {
-      await incomeTypeApi.delete(incomeTypeId);
+      setDeleteLoading(true);
+      await incomeTypeApi.delete(incomeTypeToDelete.incomeTypePkId!);
       await fetchIncomeTypes(); // Refresh the list
+      
+      // Close the popup after successful deletion
+      setShowDeletePopup(false);
+      setIncomeTypeToDelete(null);
     } catch (error) {
       console.error('Error deleting income type:', error);
+      // Show error in popup or alert
+      setShowDeletePopup(false);
       alert('Failed to delete income type. Please try again.');
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeletePopup(false);
+    setIncomeTypeToDelete(null);
   };
 
   const handleModalSubmit = async (formData: any) => {
@@ -311,7 +334,7 @@ export default function ManageIncomeType() {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDeleteIncomeType(incomeType.incomeTypePkId!)}
+                                onClick={() => handleDeleteClick(incomeType)}
                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
                                 title="Delete"
                               >
@@ -399,7 +422,7 @@ export default function ManageIncomeType() {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Admin Modal for Add/Edit */}
         <AdminModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -409,6 +432,24 @@ export default function ManageIncomeType() {
           initialData={editingIncomeType}
           isLoading={isSubmitting}
           error={modalError}
+        />
+
+        {/* Delete Confirmation Popup Modal */}
+        <PopupModal
+          isOpen={showDeletePopup}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Income Type"
+          message={
+            incomeTypeToDelete 
+              ? `Are you sure you want to delete the income type ${incomeTypeToDelete.incomeName}`
+              : "Are you sure you want to delete this income type?"
+          }
+          type="error"
+          confirmText={deleteLoading ? "Deleting..." : "Delete"}
+          cancelText="Cancel"
+          showCheckmark={false}
+          position="center" // You can change this to 'center' if you prefer
         />
       </div>
     </>

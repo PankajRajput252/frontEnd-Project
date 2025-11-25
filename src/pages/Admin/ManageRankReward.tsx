@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import AdminModal, { FormField } from '../../components/admin/AdminModal';
+import { PopupModal } from '../Dashboard/PopupModal';
 import { rankRewardApi, RankReward, AddRankRewardRequest } from '../../services/api';
 
 export default function ManageRankReward() {
   const [ranks, setRanks] = useState<RankReward[]>([]);
+  const [rankMaster, setrankMaster] = useState<RankReward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRank, setEditingRank] = useState<RankReward | null>(null);
@@ -14,31 +16,22 @@ export default function ManageRankReward() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Popup Modal States
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [rankToDelete, setRankToDelete] = useState<RankReward | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  console.log("rankMaster in income rank", rankMaster);
+
   // Fetch ranks from API
   const fetchRanks = async () => {
     try {
       setIsLoading(true);
       const response = await rankRewardApi.getAll(currentPage - 1, rowsPerPage, 'ACTIVE');
+      const response2 = await rankRewardApi.getRankMaster(0, 25, 'ACTIVE');
       setRanks(response.content);
+      setrankMaster(response2.content);
     } catch (error) {
       console.error('Error fetching ranks:', error);
-      // For now, use mock data if API fails
-      setRanks([
-        {
-          rankId: 1,
-          rankName: "Star",
-          matching: 25,
-          reward: 100,
-          achieved: false
-        },
-        {
-          rankId: 2,
-          rankName: "Golden Star",
-          matching: 50,
-          reward: 300,
-          achieved: false
-        }
-      ]);
     } finally {
       setIsLoading(false);
     }
@@ -48,13 +41,27 @@ export default function ManageRankReward() {
     fetchRanks();
   }, [currentPage, rowsPerPage]);
 
+  // Prepare dropdown options from rankMaster
+  const rankNameOptions = rankMaster.map(rank => ({
+    value: rank.rankName,
+    label: rank.rankName
+  }));
+
   // Modal form fields
   const rankFields: FormField[] = [
     {
       name: 'rankName',
       label: 'Rank Name',
+      type: 'select',
+      placeholder: 'Select rank name',
+      required: true,
+      options: rankNameOptions
+    },
+    {
+      name: 'userNodeId',
+      label: 'User Node ID',
       type: 'text',
-      placeholder: 'Enter rank name',
+      placeholder: 'Enter User Node ID',
       required: true
     },
     {
@@ -93,18 +100,33 @@ export default function ManageRankReward() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteRank = async (rankId: number) => {
-    if (!window.confirm('Are you sure you want to delete this rank?')) {
-      return;
-    }
+  const handleDeleteClick = (rank: RankReward) => {
+    setRankToDelete(rank);
+    setShowDeletePopup(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!rankToDelete) return;
 
     try {
-      await rankRewardApi.delete(rankId);
+      setDeleteLoading(true);
+      await rankRewardApi.delete(rankToDelete.rankId!);
       await fetchRanks(); // Refresh the list
+      
+      setShowDeletePopup(false);
+      setRankToDelete(null);
     } catch (error) {
       console.error('Error deleting rank:', error);
+      setShowDeletePopup(false);
       alert('Failed to delete rank. Please try again.');
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeletePopup(false);
+    setRankToDelete(null);
   };
 
   const handleModalSubmit = async (formData: any) => {
@@ -120,8 +142,9 @@ export default function ManageRankReward() {
         const addData: AddRankRewardRequest = {
           rankId: null,
           rankName: formData.rankName,
+          userNodeId: formData.userNodeId,
           matching: Number(formData.matching),
-          reward:Number(formData.reward),
+          reward: Number(formData.reward),
           achieved: formData.achieved || false
         };
         await rankRewardApi.add(addData);
@@ -275,7 +298,7 @@ export default function ManageRankReward() {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDeleteRank(rank.rankId!)}
+                                onClick={() => handleDeleteClick(rank)}
                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
                                 title="Delete"
                               >
@@ -363,7 +386,7 @@ export default function ManageRankReward() {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Admin Modal for Add/Edit */}
         <AdminModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -373,6 +396,21 @@ export default function ManageRankReward() {
           initialData={editingRank}
           isLoading={isSubmitting}
           error={modalError}
+        />
+        <PopupModal
+          isOpen={showDeletePopup}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Rank"
+          message={
+            rankToDelete 
+              ? `Are you sure you want to delete the rank ${rankToDelete.rankName}`
+              : "Are you sure you want to delete this rank?"
+          }
+          type="error"
+          confirmText={deleteLoading ? "Deleting..." : "Delete"}
+          cancelText="Cancel"
+          showCheckmark={false}
         />
       </div>
     </>

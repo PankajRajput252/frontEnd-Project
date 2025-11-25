@@ -61,6 +61,7 @@ const apiCall = async <T>(
 // Rank & Reward API functions
 export interface RankReward {
   rankId: number | null;
+  userNodeId: string;
   rankName: string;
   matching: number;
   reward: number;
@@ -80,6 +81,7 @@ export interface RankReward {
 export interface AddRankRewardRequest {
   rankId: null;
   rankName: string;
+  userNodeId: string;
   matching: Number;
   reward: Number;
   achieved: boolean;
@@ -89,6 +91,11 @@ export const rankRewardApi = {
   // Get all ranks with pagination and filtering
   getAll: (page: number = 0, size: number = 25, filterBy: string = 'ACTIVE'): Promise<{ content: RankReward[], totalElements: number }> =>
     apiCall<any>(`/api/admin/getRankAndReward?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=null`).then(response => ({
+      content: response.data || [],
+      totalElements: response.count || 0
+    })),
+  getRankMaster: (page: number = 0, size: number = 25, filterBy: string = 'ACTIVE'): Promise<{ content: RankReward[], totalElements: number }> =>
+    apiCall<any>(`/api/individual/getRankMaster?page=${page}&size=${size}&filterBy=${filterBy}&inputPkId=null&inputFkId=null`).then(response => ({
       content: response.data || [],
       totalElements: response.count || 0
     })),

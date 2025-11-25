@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import AdminModal, { FormField } from '../../components/admin/AdminModal';
-import {subscriptionIncomeTypeApi, SubscriptionType, AddSubscriptionTypeRequest } from '../../services/api';
+import { PopupModal } from '../Dashboard/PopupModal'; 
+import { subscriptionIncomeTypeApi, SubscriptionType, AddSubscriptionTypeRequest } from '../../services/api';
 
 export default function ManageSubscription() {
   const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
@@ -14,7 +15,10 @@ export default function ManageSubscription() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  
+  // Popup Modal States for Delete Confirmation
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [subscriptionToDelete, setSubscriptionToDelete] = useState<SubscriptionType | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch SubscriptionType types from API
   const fetchIncomeTypes = async () => {
@@ -24,7 +28,6 @@ export default function ManageSubscription() {
       setIncomeTypes(response.content);
     } catch (error) {
       console.error('Error fetching income types:', error);
-    
     } finally {
       setIsLoading(false);
     }
@@ -49,26 +52,7 @@ export default function ManageSubscription() {
       type: 'number',
       placeholder: 'Subscription Amount',
       required: true,
-    //   min: 1,
-    //   max: 1000000,
-    //   step: 0.01
     },
-    // {
-    //   name: 'incomeTypeCode',
-    //   label: 'Income Type Code',
-    //   type: 'select',
-    //   required: true,
-    //   options: incomeTypeOptions
-    // },
-    // {
-    //   name: 'level',
-    //   label: 'Level',
-    //   type: 'number',
-    //   placeholder: 'Enter display level',
-    //   required: true,
-    //   min: 0,
-    //   step: 1
-    // }
   ];
 
   const handleAddIncomeType = () => {
@@ -77,24 +61,41 @@ export default function ManageSubscription() {
     setIsModalOpen(true);
   };
 
-  const handleEditIncomeType = (subscriptionTypeType: SubscriptionType) => {
-    setEditingIncomeType(subscriptionTypeType);
+  const handleEditIncomeType = (subscriptionType: SubscriptionType) => {
+    setEditingIncomeType(subscriptionType);
     setModalError('');
     setIsModalOpen(true);
   };
 
-  const handleDeleteIncomeType = async (incomeTypeId: number) => {
-    if (!window.confirm('Are you sure you want to delete this income type?')) {
-      return;
-    }
+  const handleDeleteClick = (subscriptionType: SubscriptionType) => {
+    setSubscriptionToDelete(subscriptionType);
+    setShowDeletePopup(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!subscriptionToDelete) return;
 
     try {
-      await subscriptionIncomeTypeApi.delete(incomeTypeId);
+      setDeleteLoading(true);
+      await subscriptionIncomeTypeApi.delete(subscriptionToDelete.subscriptionDefinitionPkId!);
       await fetchIncomeTypes(); // Refresh the list
+      
+      // Close the popup after successful deletion
+      setShowDeletePopup(false);
+      setSubscriptionToDelete(null);
     } catch (error) {
-      console.error('Error deleting income type:', error);
-      alert('Failed to delete income type. Please try again.');
+      console.error('Error deleting subscription type:', error);
+      // Show error in popup or alert
+      setShowDeletePopup(false);
+      alert('Failed to delete subscription type. Please try again.');
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeletePopup(false);
+    setSubscriptionToDelete(null);
   };
 
   const handleModalSubmit = async (formData: any) => {
@@ -151,6 +152,27 @@ export default function ManageSubscription() {
     if (name.includes('node')) return '🟢';
     return '💰';
   };
+
+  const formatDate = (dateValue: string | number | null | undefined) => {
+  if (!dateValue) return '—';
+  
+  try {
+    const date = new Date(dateValue);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch {
+    return 'Invalid Date';
+  }
+};
 
   return (
     <>
@@ -238,25 +260,14 @@ export default function ManageSubscription() {
                             </div>
                           </td>
                           <td className="py-4 px-6 text-gray-300 font-semibold">
-                            {subscriptionTypes.subscriptionAmount ?? '—'}
+                            ${subscriptionTypes.subscriptionAmount?.toLocaleString() ?? '—'}
                           </td>
                           <td className="py-4 px-6 text-gray-300 font-mono">
-                            {subscriptionTypes.subscriptionStartDateTime || '—'}
+                            {formatDate(subscriptionTypes.subscriptionStartDateTime)}
                           </td>
                           <td className="py-4 px-6 text-gray-300 font-mono">
-                            {subscriptionTypes.subscriptionEndDateTime || '—'}
+                            {formatDate(subscriptionTypes.subscriptionEndDateTime)}
                           </td>
-                          {/* <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <span className="text-green-400 font-bold text-lg">{subscriptionTypes.subscriptionAmount}</span>
-                              <div className="w-20 bg-gray-700 rounded-full h-2">
-                                <div 
-                                  className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-300"
-                                  style={{ width: `${Math.min(incomeType.percentage, 100)}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                          </td> */}
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <button
@@ -269,7 +280,7 @@ export default function ManageSubscription() {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDeleteIncomeType(subscriptionTypes.subscriptionDefinitionPkId!)}
+                                onClick={() => handleDeleteClick(subscriptionTypes)}
                                 className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/20 rounded-lg transition-colors"
                                 title="Delete"
                               >
@@ -357,7 +368,7 @@ export default function ManageSubscription() {
           )}
         </div>
 
-        {/* Modal */}
+        {/* Admin Modal for Add/Edit */}
         <AdminModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -367,6 +378,24 @@ export default function ManageSubscription() {
           initialData={editingIncomeType}
           isLoading={isSubmitting}
           error={modalError}
+        />
+
+        {/* Delete Confirmation Popup Modal */}
+        <PopupModal
+          isOpen={showDeletePopup}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Subscription Type"
+          message={
+            subscriptionToDelete 
+              ? `Are you sure you want to delete the subscription type ${subscriptionToDelete.subscriptionName}`
+              : "Are you sure you want to delete this subscription type?"
+          }
+          type="error"
+          confirmText={deleteLoading ? "Deleting..." : "Delete"}
+          cancelText="Cancel"
+          showCheckmark={false}
+          position="center"
         />
       </div>
     </>
