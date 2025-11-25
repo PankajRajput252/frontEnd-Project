@@ -78,7 +78,7 @@ const AccountDetailsCard: React.FC = () => {
  
   const initials = getInitials(userData.name);
   const accountData = [
-    { label: "Affiliate ID", value: userData.parentNodeId || "N/A" },
+    { label: "Affiliate ID", value: userData?.parentNodeId || "NODE24770625" },
     { label: "Service", value: userData.userStatus || "Inactive" },
     { label: "Country", value: userData.country || "N/A" },
     { label: "Position", value: userData.position || "N/A" },

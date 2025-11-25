@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { Modal } from "../components/ui/modal";
-import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem,walletDataApi } from "../services/api";
+import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem,walletDataApi,SubscriptionType ,subscriptionIncomeTypeApi} from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 interface MiningReportRow {
@@ -55,6 +55,8 @@ export default function MiningPackage() {
   const [isOtpMatched, setIsOtpMatched] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
+
 
 
   const [data, setData] = useState<MiningReportRow[]>([]);
@@ -102,6 +104,22 @@ export default function MiningPackage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, rowsPerPage, filterBy, user?.nodeId]);
 
+  const fetchIncomeTypes = async () => {
+    try {
+      const response = await subscriptionIncomeTypeApi.getAll(currentPage , rowsPerPage, 'ACTIVE');
+      setIncomeTypes(response.content);
+    } catch (error) {
+      console.error('Error fetching income types:', error);
+    
+    } finally {
+      
+    }
+  };
+
+  useEffect(() => {
+    fetchIncomeTypes();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted!", { 
@@ -118,7 +136,7 @@ export default function MiningPackage() {
     const payload: AddMiningPackageRequest = {
       miningPackagePkId: null,
       userNodeCode: user?.nodeId || "",
-      packageAmount: 250,
+      packageAmount: incomeTypes[0]?.subscriptionAmount,
       mode: "MINING",
       transactionPassword,
       remarks,
@@ -170,7 +188,7 @@ export default function MiningPackage() {
       const payload: AddMiningPackageRequest = {
         miningPackagePkId: null,
         userNodeCode: user.nodeId,
-        packageAmount: 250,
+        packageAmount: incomeTypes[0]?.subscriptionAmount,
         mode: "MINING",
         transactionPassword,
         remarks,
@@ -329,14 +347,14 @@ export default function MiningPackage() {
             <span className="text-sm text-blue-700 dark:text-blue-300">Notification</span>
           </div>
           <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-            Here, you can activate your mining package of $250 from your Node Wallet.
+            Here, you can activate your mining package of ${incomeTypes[0]?.subscriptionAmount} from your Node Wallet.
           </p>
         </div>
 
         {/* Node Wallet Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Node Wallet</h3>
-          <div className="text-3xl font-bold text-white">$0</div>
+          <div className="text-3xl font-bold text-white">${incomeTypes[0]?.subscriptionAmount}</div>
         </div>
 
         {/* Main Content - 4/8 Column Layout */}
