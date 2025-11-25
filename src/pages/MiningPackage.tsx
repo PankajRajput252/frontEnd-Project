@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { Modal } from "../components/ui/modal";
-import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem,walletDataApi,SubscriptionType ,subscriptionIncomeTypeApi} from "../services/api";
+import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem,walletDataApi,SubscriptionType ,subscriptionIncomeTypeApi,WalletData} from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 interface MiningReportRow {
@@ -26,6 +26,14 @@ interface MiningReportRow {
   date: string;
   remarks: string;
   originalData?: MiningPackageItem; // Store original data for editing
+}
+
+interface WalletData {
+  mineWallet: number;
+  nodeWallet: number;
+  capitalWallet: number;
+  totalCredit: number;
+  totalDebit: number;
 }
 
 export default function MiningPackage() {
@@ -56,7 +64,13 @@ export default function MiningPackage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
-
+  const [wallet, setWallet] = useState<WalletData>({
+    mineWallet: 0,
+    nodeWallet: 0,
+    capitalWallet: 0,
+    totalCredit: 0,
+    totalDebit: 0,
+  });
 
 
   const [data, setData] = useState<MiningReportRow[]>([]);
@@ -116,9 +130,47 @@ export default function MiningPackage() {
     }
   };
 
+  const fetchWalletData = async (nodeId: string) => {
+    try {
+      const url = `http://MineCryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getWalletData?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=${nodeId}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === "SUCCESS" && data.data?.length > 0) {
+        const walletInfo = data.data[0];
+        setWallet({
+          mineWallet: walletInfo.mineWallet ?? 0,
+          nodeWallet: walletInfo.nodeWallet ?? 0,
+          capitalWallet: walletInfo.capitalWallet ?? 0,
+          totalCredit: walletInfo.totalCredit ?? 0,
+          totalDebit: walletInfo.totalDebit ?? 0,
+        });
+      } else {
+        console.warn("No wallet data found for node:", nodeId);
+      }
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchIncomeTypes();
+  // }, []);
   useEffect(() => {
-    fetchIncomeTypes();
+    const loadData = async () => {
+      try {
+        await fetchIncomeTypes();
+        await fetchWalletData(user?.nodeId|| "");
+      } catch (error) {
+        console.error("Error loading data", error);
+      }
+    };
+  
+    loadData();
   }, []);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -347,14 +399,14 @@ export default function MiningPackage() {
             <span className="text-sm text-blue-700 dark:text-blue-300">Notification</span>
           </div>
           <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-            Here, you can activate your mining package of ${incomeTypes[0]?.subscriptionAmount} from your Node Wallet.
+            Here, you can activate your mining package of ${wallet?.nodeWallet} from your Node Wallet.
           </p>
         </div>
 
         {/* Node Wallet Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Node Wallet</h3>
-          <div className="text-3xl font-bold text-white">${incomeTypes[0]?.subscriptionAmount}</div>
+          <div className="text-3xl font-bold text-white">${wallet?.nodeWallet}</div>
         </div>
 
         {/* Main Content - 4/8 Column Layout */}

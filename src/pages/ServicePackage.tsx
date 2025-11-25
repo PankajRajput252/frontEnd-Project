@@ -28,6 +28,14 @@ interface MiningReportRow {
   originalData?: MiningPackageItem; // Store original data for editing
 }
 
+interface WalletData {
+  mineWallet: number;
+  nodeWallet: number;
+  capitalWallet: number;
+  totalCredit: number;
+  totalDebit: number;
+}
+
 export default function ServicePackage() {
   const { user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -55,6 +63,14 @@ export default function ServicePackage() {
   const [isOtpMatched, setIsOtpMatched] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [wallet, setWallet] = useState<WalletData>({
+    mineWallet: 0,
+    nodeWallet: 0,
+    capitalWallet: 0,
+    totalCredit: 0,
+    totalDebit: 0,
+  });
+
 
   const [data, setData] = useState<MiningReportRow[]>([]);
 
@@ -100,6 +116,40 @@ export default function ServicePackage() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, rowsPerPage, filterBy, user?.nodeId]);
+
+
+  
+  const fetchWalletData = async (nodeId: string) => {
+    try {
+      const url = `http://MineCryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getWalletData?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=${nodeId}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === "SUCCESS" && data.data?.length > 0) {
+        const walletInfo = data.data[0];
+        setWallet({
+          mineWallet: walletInfo.mineWallet ?? 0,
+          nodeWallet: walletInfo.nodeWallet ?? 0,
+          capitalWallet: walletInfo.capitalWallet ?? 0,
+          totalCredit: walletInfo.totalCredit ?? 0,
+          totalDebit: walletInfo.totalDebit ?? 0,
+        });
+      } else {
+        console.warn("No wallet data found for node:", nodeId);
+      }
+    } catch (error) {
+      console.error("Error fetching wallet data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    
+     fetchWalletData(user?.nodeId|| "");
+     
+  }, []);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,14 +377,14 @@ export default function ServicePackage() {
             <span className="text-sm text-blue-700 dark:text-blue-300">Notification</span>
           </div>
           <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-            Here, you can activate your mining package of $250 from your Node Wallet.
+            Here, you can activate your mining package of ${wallet?.nodeWallet} from your Node Wallet.
           </p>
         </div>
 
         {/* Node Wallet Section */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Node Wallet</h3>
-          <div className="text-3xl font-bold text-white">$0</div>
+          <div className="text-3xl font-bold text-white">${wallet?.nodeWallet}</div>
         </div>
 
         {/* Main Content - 4/8 Column Layout */}
