@@ -679,6 +679,7 @@ export interface MiningPackageItem {
   userNodeCode?: string;
   packageAmount?: number;
   remarks?: string;
+  nodeAmount:number;
   mode?: string; // e.g. 'NODE'
   transactionPassword?: string;
   packageStatus?: string; // e.g. 'IN_PROGRESS'
