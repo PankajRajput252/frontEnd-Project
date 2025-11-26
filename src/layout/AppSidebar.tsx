@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: " Direct Team", path: "directTeam", pro: false },
       { name: "All Team", path: "allTeam", pro: false },
-      { name: "Business History", path: "businessHistory", pro: false },
+      // { name: "Business History", path: "businessHistory", pro: false },
     ],
   },
 
