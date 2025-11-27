@@ -50,7 +50,7 @@ export default function Support() {
   const fetchSupportTickets = async () => {
     setTicketsLoading(true);
     try {
-      const response = await supportTicketApi.getAll(0, 25, 'ACTIVE', user?.nodeId || null);
+      const response = await supportTicketApi.getAll(0, 25, 'ACTIVE',  null);
       setSupportTickets(response.content || []);
     } catch (err) {
       console.error("Failed to fetch support tickets:", err);
@@ -447,7 +447,7 @@ export default function Support() {
                 </div>
               </div>
 
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <label className="mb-3 block text-white font-medium text-lg">
                   Message
                 </label>
@@ -459,7 +459,7 @@ export default function Support() {
                   placeholder="Type message"
                   className="w-full rounded-lg border-2 border-gray-600 bg-gray-700 py-4 px-6 text-white font-medium outline-none transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 hover:border-gray-500 placeholder-gray-400 resize-none"
                 />
-              </div>
+              </div> */}
 
               <div className="mb-6">
                 <label className="mb-3 block text-white font-medium text-lg">
