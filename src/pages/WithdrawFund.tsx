@@ -41,6 +41,8 @@ export default function WithdrawFund() {
   const [deletingRequestId, setDeletingRequestId] = useState<number | null>(null);
   const { isOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal();
   const [editingRequest, setEditingRequest] = useState<WithdrawalRequest | null>(null);
+  const [otpData,setOtpData]=useState("");
+  const [isOtpMatched, setIsOtpMatched] = useState(false);
   const [editFormData, setEditFormData] = useState({
     walletType: "",
     walletAddress: "",
@@ -97,19 +99,37 @@ export default function WithdrawFund() {
   };
 
   const handleSendOTP = async () => {
+    console.log("Useer email--->",user?.email)
     setOtpLoading(true);
-    setError("");
-    setSuccess("");
     try {
-      // Simulate API call - OTP sending endpoint might be separate
+    
+      // Simulate API call
+       const response = await walletDataApi.addOtp(user?.email ,user?.nodeId || null);
+       console.log(response);
+       setOtpData(response?.id || "");
       await new Promise(resolve => setTimeout(resolve, 1500));
       setIsOtpSent(true);
-      setSuccess("OTP sent successfully to your registered email/mobile");
+      setSuccess("OTP sent successfully to your registered email");
     } catch (err) {
       setError("Failed to send OTP. Please try again.");
     } finally {
       setOtpLoading(false);
     }
+  };
+
+   const handleVerifyOTP = async () => {
+    console.log("Useer oneTimePassword--->",formData.oneTimePassword)
+    console.log("sent oneTimePassword--->",otpData)
+   if(formData.oneTimePassword==otpData){
+    console.log("otp matched")
+    setIsOtpMatched(true);
+    setSuccess("OTP Verified successfully.");
+   }
+   else{
+    console.log("otp NOT matched")
+    setError(" OTP MisMatched. Please try again.");
+    setIsOtpMatched(false);
+   }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -538,6 +558,14 @@ export default function WithdrawFund() {
                       "Send OTP"
                     )}
                   </button>
+                  {
+                      isOtpSent &&   
+                      <button
+                      type="button"
+                      onClick={handleVerifyOTP}
+                      className="px-6 py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-300 whitespace-nowrap"
+                     >Verify</button>
+                    }
                 </div>
               </div>
 
@@ -583,7 +611,7 @@ export default function WithdrawFund() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading  || !isOtpMatched}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100"
               >
                 {isLoading ? (
