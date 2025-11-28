@@ -2,10 +2,15 @@
 // Centralized API calls with authentication handling
  
 // Prefer configured API URL; avoid localhost default in production to prevent Netlify runtime failures
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== ''
+//     ? import.meta.env.VITE_API_BASE_URL
+//     : (import.meta.env.PROD ? '' : 'http://localhost:8080');
+
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== ''
-    ? import.meta.env.VITE_API_BASE_URL
-    : (import.meta.env.PROD ? '' : 'http://localhost:8080');
+  import.meta.env.VITE_API_BASE_URL?.trim() || 
+  "https://Minecryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com";
+
  
 // Get auth token from localStorage
 export const getAuthToken = (): string | null => {
