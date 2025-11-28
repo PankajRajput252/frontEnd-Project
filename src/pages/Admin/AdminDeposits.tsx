@@ -46,7 +46,7 @@ export default function AdminDeposits() {
 
       // Fetch deposits
       try {
-        const depositsResponse = await depositFundApi.getAll(0, 100, 'ACTIVE', user?.nodeId || null);
+        const depositsResponse = await depositFundApi.getAll(0, 100, 'ACTIVE', null);
         console.log('Deposits API response:', depositsResponse);
         console.log('Deposits content:', depositsResponse.content);
         // Log each deposit for debugging
