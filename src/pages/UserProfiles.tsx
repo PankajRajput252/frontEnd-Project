@@ -633,7 +633,7 @@ export default function UserProfiles() {
                         className="pr-12"
                         placeholder="Enter transaction password"
                       />
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
@@ -643,7 +643,17 @@ export default function UserProfiles() {
                         ) : (
                           <EyeCloseIcon className="w-5 h-5" />
                         )}
-                      </button>
+                      </button> */}
+                        <span
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                      >
+                        {showPassword ? (
+                          <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                        ) : (
+                          <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                        )}
+                      </span>
                     </div>
                   </div>
                 </div>

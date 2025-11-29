@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { Modal } from "../components/ui/modal";
-import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem ,walletDataApi} from "../services/api";
+import { AddMiningPackageRequest, miningPackageApi, MiningPackageItem ,walletDataApi,SubscriptionType,subscriptionIncomeTypeApi} from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 interface MiningReportRow {
@@ -63,6 +63,7 @@ export default function ServicePackage() {
   const [isOtpMatched, setIsOtpMatched] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [incomeTypes, setIncomeTypes] = useState<SubscriptionType[]>([]);
   const [wallet, setWallet] = useState<WalletData>({
     mineWallet: 0,
     nodeWallet: 0,
@@ -116,7 +117,17 @@ export default function ServicePackage() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, rowsPerPage, filterBy, user?.nodeId]);
-
+  const fetchIncomeTypes = async () => {
+    try {
+      const response = await subscriptionIncomeTypeApi.getAll(currentPage , rowsPerPage, 'ACTIVE');
+      setIncomeTypes(response.content);
+    } catch (error) {
+      console.error('Error fetching income types:', error);
+    
+    } finally {
+      
+    }
+  };
 
   
   const fetchWalletData = async (nodeId: string) => {
@@ -144,10 +155,22 @@ export default function ServicePackage() {
     }
   };
 
-  useEffect(() => {
+  // useEffect(() => {
     
-     fetchWalletData(user?.nodeId|| "");
+  //    fetchWalletData(user?.nodeId|| "");
      
+  // }, []);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        await fetchIncomeTypes();
+        await fetchWalletData(user?.nodeId|| "");
+      } catch (error) {
+        console.error("Error loading data", error);
+      }
+    };
+  
+    loadData();
   }, []);
   
 
