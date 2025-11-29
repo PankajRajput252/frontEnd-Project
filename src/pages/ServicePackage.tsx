@@ -167,7 +167,7 @@ export default function ServicePackage() {
     const payload: AddMiningPackageRequest = {
       miningPackagePkId: null,
       userNodeCode: user?.nodeId || "",
-      packageAmount: 250,
+      packageAmount: 1,
       mode: "NODE",
       transactionPassword,
       remarks,
@@ -218,7 +218,7 @@ export default function ServicePackage() {
       const payload: AddMiningPackageRequest = {
         miningPackagePkId: null,
         userNodeCode: user.nodeId,
-        packageAmount: 250,
+        packageAmount: 1,
         mode: "NODE",
         transactionPassword,
         remarks,

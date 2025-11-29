@@ -196,6 +196,9 @@ export default function MiningPackage() {
       localDateTime: new Date().toISOString(), // Set current date/time
     };
     console.log("Before API call successful:", payload);
+    try{
+
+    
     const result = await miningPackageApi.add(payload);
     console.log("API call successful:", result);
     setSuccess("Mining package activated successfully!");
@@ -204,6 +207,20 @@ export default function MiningPackage() {
     setRemarks("");
     setCheckMeOut(false);
     await loadData();
+    } 
+    catch (e: any) {
+      console.log("Backend error:", e?.response?.data);
+    
+      const errorData = e?.response?.data;
+    
+      const message =
+        errorData?.status ||
+        errorData?.message ||
+        "Something went wrong";
+    
+      setError("Pls purchase Service package first");
+    }
+    
     
     // Check if user is confirmed for mining access (only block if explicitly false, allow undefined)
     if (user?.isConfirmed === false) {

@@ -70,8 +70,8 @@ export default function Home() {
     + (incomeData?.[0]?.miningGenerationIncomeAmount ?? 0)
     + (incomeData?.[0]?.nodeBusinessSharingAmount ?? 0)
     + (incomeData?.[0]?.matchingIncomeAmount ?? 0);
-    const bigCardProfile = wallet.mineWallet + wallet.nodeWallet + wallet.capitalWallet;
-    const totalProfile = cardProfile + bigCardProfile;
+    const bigCardProfile =  wallet.nodeWallet + wallet.capitalWallet;
+    const totalProfile =bigCardProfile+ cardProfile;
   const fetchWalletData = async (nodeId: string) => {
     try {
       const url = `http://MineCryptos-env.eba-nsbmtw9i.ap-south-1.elasticbeanstalk.com/api/individual/getWalletData?page=0&size=25&filterBy=ACTIVE&inputPkId=null&inputFkId=${nodeId}`;
@@ -117,7 +117,7 @@ export default function Home() {
             <div className="text-right">
               <p className="text-sm text-blue-200 dark:text-blue-300">Total Portfolio Value</p>
               <p className="text-2xl font-bold text-white">
-                ${totalProfile.toFixed(2)}
+                ${totalProfile}
               </p>
             </div>
           </div>
